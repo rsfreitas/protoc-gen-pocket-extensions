@@ -1,0 +1,32 @@
+fn build_{{toSnake .PackageName}}() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all("{{.OutputDir}}")?;
+    tonic_build::configure()
+        {{- if gt (len .OutputDir) 0}}
+        .out_dir("{{.OutputDir}}")
+        {{- end}}
+        .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .extern_path(".google.protobuf.Any", "::prost_wkt_types::Any")
+        .extern_path(".google.protobuf.Timestamp", "::prost_wkt_types::Timestamp")
+        .extern_path(".google.protobuf.Value", "::prost_wkt_types::Value")
+        {{- range .FieldAttributes}}
+        .field_attribute("{{.Name}}", "{{.Attribute}}")
+        {{- end}}
+        .compile(
+            &["{{.ProtoFilePath}}"],
+            &[
+            {{- range $path := .ProtoIncludePaths}}
+                "{{$path}}",
+            {{- end}}
+            ],
+        )?;
+
+    Ok(())
+}
+{{- if .SingleProtobuf}}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+	fmt.Println(string(file.GoPackageName))
+    build_{{toSnake .PackageName}}()?;
+    Ok(())
+}
+{{- end}}

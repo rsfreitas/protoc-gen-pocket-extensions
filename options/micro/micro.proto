@@ -1,0 +1,20 @@
+
+syntax = "proto2";
+
+package micro;
+option go_package = "github.com/rsfreitas/protoc-gen-micro-micro/options/micro;micro";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+  optional string micro_app_name = 66041;
+}
+
+extend google.protobuf.FieldOptions {
+  optional Database database = 66041;
+}
+
+message Database {
+  optional string name = 1;
+}
+

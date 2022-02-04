@@ -1,0 +1,27 @@
+
+use rocket::{Rocket, State};
+use rocket_contrib::json::Json;
+{{$module := .Module}}{{$service := .GrpcServiceName}}{{- range .Methods}}
+#[{{.Method}}("{{.Endpoint}}", format = "application/json", data = "<req>")]
+pub async fn {{toSnake .Name}}_handler(
+    req: Json<super::{{$module}}::{{.InputName}}>,
+    service: &State<std::sync::Arc<micro::Service>>,
+    handlers: &State<dyn super::{{$module}}::{{$service}}>
+) -> rocket::response::content::Json<String> {
+    let mut handler_request = tonic::Request::new(req.into_inner());
+    handler_request.extensions_mut().insert(service.inner().clone());
+
+    let res = handler.{{toSnake .Name}}(handler_request).await;
+    micro::http::response_from_rpc(res)
+}
+{{end}}
+pub fn http_router(
+    service: &std::sync::Arc<micro::service::Service>,
+    server: Box<dyn {{.GrpcServiceName}}>,
+) -> Rocket<rocket::Build> {
+    rocket::custom(service.http_config())
+        {{- range .Methods}}
+        .mount("/", routes![{{toSnake .Name}}_handler])
+        {{- end}}
+}
+
