@@ -25,7 +25,7 @@ fn build_{{toSnake .PackageName}}() -> Result<(), Box<dyn std::error::Error>> {
 {{- if .SingleProtobuf}}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-	fmt.Println(string(file.GoPackageName))
+    println!("cargo:rerun-if-changed=build.rs");
     build_{{toSnake .PackageName}}()?;
     Ok(())
 }
