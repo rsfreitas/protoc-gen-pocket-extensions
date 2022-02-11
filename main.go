@@ -13,12 +13,15 @@ func main() {
 		ParamFunc: options.FlagsSet(),
 	}.Run(func(plugin *protogen.Plugin) error {
 		tpl, err := templates.Load(&templates.LoadOptions{
-			Plugin:         plugin,
-			SingleProtobuf: options.SingleProtobuf(),
-			OutputDir:      options.OutputDir(),
-			PrototoolPath:  options.PrototoolPath(),
-			IncludePaths:   options.IncludePaths(),
-			UseRocket:      options.Rocket(),
+			Plugin:          plugin,
+			SingleProtobuf:  options.SingleProtobuf(),
+			OutputDir:       options.OutputDir(),
+			PrototoolPath:   options.PrototoolPath(),
+			IncludePaths:    options.IncludePaths(),
+			UseRocket:       options.Rocket(),
+			ExportOpenapi:   options.ExportOpenapi(),
+			ExportRust:      options.ExportRust(),
+			OpenapiSettings: options.OpenapiSettings(),
 		})
 		if err != nil {
 			return err
