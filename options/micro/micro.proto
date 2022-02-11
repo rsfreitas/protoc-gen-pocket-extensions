@@ -10,11 +10,59 @@ extend google.protobuf.FileOptions {
   optional string micro_app_name = 66041;
 }
 
+extend google.protobuf.ServiceOptions {
+  optional Service service = 66041;
+}
+
+extend google.protobuf.MethodOptions {
+  optional Method method = 66041;
+}
+
 extend google.protobuf.FieldOptions {
   optional Database database = 66041;
 }
 
 message Database {
   optional string name = 1;
+}
+
+message Service {
+  optional ServiceHttp http = 1;
+}
+
+message Method {
+  optional MethodHttp http = 1;
+}
+
+message MethodHttp {
+  optional bool auth = 1;
+  repeated string scope = 2;
+  repeated Parameter header = 3;
+}
+
+message ServiceHttp {
+  optional ServiceAuthentication authentication = 1;
+  repeated Parameter header = 2;
+}
+
+message ServiceAuthentication {
+  optional HttpAuthenticationType type = 1;
+}
+
+enum HttpAuthenticationType {
+  MICRO_HTTP_AUTHENTICATION_TYPE_UNSPECIFIED = 0;
+  MICRO_HTTP_AUTHENTICATION_TYPE_BEARER = 1;
+}
+
+message Parameter {
+  required string name = 1;
+  optional ParameterType type = 2;
+  optional bool required = 3;
+}
+
+enum ParameterType {
+  PARAMETER_TYPE_UNSPECIFIED = 0;
+  PARAMETER_TYPE_STRING = 1;
+  PARAMETER_TYPE_NUMBER = 2;
 }
 
