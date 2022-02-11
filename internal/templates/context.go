@@ -20,16 +20,22 @@ type context struct {
 	ProtoIncludePaths []string
 	FieldAttributes   []*proto.FieldAttribute
 	Methods           []*proto.Method
+
+	exportOpenapi bool
+	exportRust    bool
 }
 
 func (c *context) ValidateForExecute() map[string]template.TemplateValidator {
 	return map[string]template.TemplateValidator{
 		"http.rs": func() bool {
-			return c.IsHttpService()
+			return c.exportRust && c.IsHttpService()
 		},
 		"build.rs": func() bool {
 			// All protobuf specification files must generated this template.
-			return true
+			return c.exportRust
+		},
+		"openapi.yaml": func() bool {
+			return c.exportOpenapi
 		},
 	}
 }
@@ -43,7 +49,7 @@ func (c *context) Extension() string {
 // at least one endpoint declaration.
 func (c *context) IsHttpService() bool {
 	for _, m := range c.Methods {
-		if m.Endpoint != "" || m.Method != "" {
+		if m.IsHttp() {
 			return true
 		}
 	}
@@ -74,6 +80,8 @@ func buildContext(options *LoadOptions) (*context, error) {
 		ProtoFilePath:     fmt.Sprintf("%v/%v", options.PrototoolPath, protoFilePath),
 		ProtoIncludePaths: options.IncludePaths,
 		FieldAttributes:   proto.GetFieldAttributes(options.Plugin),
+		exportOpenapi:     options.ExportOpenapi,
+		exportRust:        options.ExportRust,
 	}
 
 	spec, err := proto.Parse(options.Plugin)

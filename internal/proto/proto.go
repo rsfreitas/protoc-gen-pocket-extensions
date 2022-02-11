@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
@@ -18,14 +17,6 @@ type Spec struct {
 	PackageName string
 	ServiceName string
 	Methods     []*Method
-}
-
-type Method struct {
-	Name       string
-	Endpoint   string
-	Method     string
-	InputName  string
-	OutputName string
 }
 
 type FieldAttribute struct {
@@ -133,44 +124,10 @@ func getProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, er
 
 	// Proto file has no service declared. Nothing for us to handle here.
 	if len(file.Services) == 0 {
-		fmt.Println("1")
 		return nil, nil
 	}
 
 	return file, nil
-}
-
-func parseMethods(file *protogen.File) ([]*Method, error) {
-	// Probably the first service is what we want.
-	service := file.Proto.Service[0]
-
-	var methods []*Method
-	for _, method := range service.Method {
-		var (
-			endpoint   string
-			httpMethod string
-		)
-
-		api := getGoogleHttpAPIIfAny(method)
-		if api != nil {
-			httpMethod, endpoint = getMethodAndEndpoint(api)
-		}
-
-		methods = append(methods, &Method{
-			Name:       method.GetName(),
-			InputName:  filterPackageName(method.GetInputType()),
-			OutputName: filterPackageName(method.GetOutputType()),
-			Endpoint:   endpoint,
-			Method:     httpMethod,
-		})
-	}
-
-	return methods, nil
-}
-
-func filterPackageName(name string) string {
-	parts := strings.Split(name, ".")
-	return parts[len(parts)-1]
 }
 
 func getMicroFileOptions(file *descriptor.FileDescriptorProto) string {
@@ -184,43 +141,53 @@ func getMicroFileOptions(file *descriptor.FileDescriptorProto) string {
 	return ""
 }
 
-// getGoogleHttpAPIIfAny gets the google.api.http extension of a method if exists.
-func getGoogleHttpAPIIfAny(msg *descriptor.MethodDescriptorProto) *annotations.HttpRule {
-	if msg.Options != nil {
-		h := proto.GetExtension(msg.Options, annotations.E_Http)
-		return (h.(*annotations.HttpRule))
+// searchMessageByName searches for a protobuf message by its name. It returns
+// both the protogen.Message and a descriptor.DescriptorProto if found.
+func searchPackageMessageByName(file *protogen.File, fullyQualifiedName string) (msg *protogen.Message, msgDescriptor *descriptor.DescriptorProto, err error) {
+	packageName, msgName := splitPackageAndMessage(fullyQualifiedName)
+
+	// Assures that we only search for messages that belongs to the same
+	// package.
+	if packageName != string(file.Desc.FullName()) {
+		return nil, nil, fmt.Errorf("message '%s' does not belong to the current package", fullyQualifiedName)
 	}
 
-	return nil
+	for _, message := range file.Messages {
+		if message.GoIdent.GoName == msgName {
+			msg = message
+			break
+		}
+	}
+
+	if msg != nil {
+		for _, message := range file.Proto.MessageType {
+			if message.GetName() == msgName {
+				msgDescriptor = message
+				break
+			}
+		}
+	}
+
+	if msg == nil {
+		err = fmt.Errorf("could not find message with name '%s' inside the package", msgName)
+	}
+
+	return
 }
 
-// getMethodAndEndpoint translates a google.api.http notation of a request
-// type to our supported type.
-func getMethodAndEndpoint(rule *annotations.HttpRule) (string, string) {
-	method := ""
-	endpoint := ""
+// splitPackageAndMessage splits a protobuf message name into its package name
+// and its proper name.
+func splitPackageAndMessage(messageName string) (string, string) {
+	parts := strings.Split(messageName, ".")
+	return strings.Join(parts[1:len(parts)-1], "."), parts[len(parts)-1]
+}
 
-	switch rule.GetPattern().(type) {
-	case *annotations.HttpRule_Get:
-		method = "get"
-		endpoint = rule.GetGet()
-
-	case *annotations.HttpRule_Post:
-		method = "post"
-		endpoint = rule.GetPost()
-
-	case *annotations.HttpRule_Put:
-		method = "put"
-		endpoint = rule.GetPut()
-
-	case *annotations.HttpRule_Delete:
-		method = "delete"
-		endpoint = rule.GetDelete()
-
-	case *annotations.HttpRule_Patch:
-		method = "patch"
-		endpoint = rule.GetPatch()
+func isIn(haystack []string, needle string) bool {
+	for _, s := range haystack {
+		if s == needle {
+			return true
+		}
 	}
 
-	return method, endpoint
+	return false
 }

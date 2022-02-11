@@ -2,26 +2,56 @@
 use rocket::{Rocket, State};
 use rocket_contrib::json::Json;
 {{$module := .Module}}{{$service := .GrpcServiceName}}{{- range .Methods}}
-#[{{.Method}}("{{.Endpoint}}", format = "application/json", data = "<req>")]
+#[{{.HttpMethod}}("{{.RocketEndpoint}}"{{if .HasBody}}, format = "application/json", data = "<req>"{{end}})]
 pub async fn {{toSnake .Name}}_handler(
-    req: Json<super::{{$module}}::{{.InputName}}>,
-    service: &State<std::sync::Arc<micro::Service>>,
-    handlers: &State<dyn super::{{$module}}::{{$service}}>
+{{- range .PathParameters}}
+    {{.ProtoName}}: {{.RustType}},
+{{- end}}
+{{- range .QueryParameters}}
+    {{.ProtoName}}: {{.RustType}},
+{{- end}}
+{{- if .HasAuthentication}}
+    token: micro::auth::Token,
+{{- end}}
+{{- if .HasBody}}
+    req: rocket::serde::json::Json<crate::{{$module}}::{{.BodyArgumentType}}>,
+{{- end}}
+    service: &State<std::sync::Arc<micro::service::Service>>,
+    handlers: &State<Box<dyn crate::{{$module}}::{{toSnake $service}}_server::{{$service}}>>
 ) -> rocket::response::content::Json<String> {
+{{- if .NeedsInitializeInput}}
+    let body = crate::{{$module}}::{{.Input.Name}} {
+    {{- if .HasBody}}
+        {{.BodyArgumentName}}: Some(req.into_inner()),
+    {{- end}}
+    {{- range .PathParameters}}
+        {{.ProtoName}}: {{.ProtoName}}{{.BodyInitCall}},
+    {{- end}}
+    {{- range .QueryParameters}}
+        {{.ProtoName}}: {{.ProtoName}}{{.BodyInitCall}},
+    {{- end}}
+    };
+
+    let mut handler_request = tonic::Request::new(body);
+{{- else}}
     let mut handler_request = tonic::Request::new(req.into_inner());
+{{- end}}
     handler_request.extensions_mut().insert(service.inner().clone());
 
-    let res = handler.{{toSnake .Name}}(handler_request).await;
+    let res = handlers.{{toSnake .Name}}(handler_request).await;
     micro::http::response_from_rpc(res)
 }
 {{end}}
 pub fn http_router(
     service: &std::sync::Arc<micro::service::Service>,
-    server: Box<dyn {{.GrpcServiceName}}>,
+    server: Box<dyn crate::{{.Module}}::{{toSnake .GrpcServiceName}}_server::{{.GrpcServiceName}}>,
 ) -> Rocket<rocket::Build> {
     rocket::custom(service.http_config())
+        .manage(server)
+        .mount("/", routes![
         {{- range .Methods}}
-        .mount("/", routes![{{toSnake .Name}}_handler])
+            {{toSnake .Name}}_handler,
         {{- end}}
+        ])
 }
 

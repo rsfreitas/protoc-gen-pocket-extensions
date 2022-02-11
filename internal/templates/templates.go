@@ -3,6 +3,7 @@ package templates
 import (
 	"embed"
 
+	//	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/compiler/protogen"
 
 	"github.com/rsfreitas/go-micro-utils/template"
@@ -11,13 +12,17 @@ import (
 //go:embed *.tmpl
 var files embed.FS
 
+// TODO: need to validate here for mandatory options
 type LoadOptions struct {
-	SingleProtobuf bool
-	UseRocket      bool
-	OutputDir      string
-	PrototoolPath  string
-	IncludePaths   []string
-	Plugin         *protogen.Plugin
+	SingleProtobuf  bool
+	UseRocket       bool
+	ExportOpenapi   bool
+	ExportRust      bool
+	OpenapiSettings string
+	OutputDir       string
+	PrototoolPath   string
+	IncludePaths    []string
+	Plugin          *protogen.Plugin
 }
 
 func Load(options *LoadOptions) (*template.Templates, error) {
