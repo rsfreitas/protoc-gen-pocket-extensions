@@ -1,6 +1,5 @@
 
 use rocket::{Rocket, State};
-use rocket_contrib::json::Json;
 {{$module := .Module}}{{$service := .GrpcServiceName}}{{- range .Methods}}
 #[{{.HttpMethod}}("{{.RocketEndpoint}}"{{if .HasBody}}, format = "application/json", data = "<req>"{{end}})]
 pub async fn {{toSnake .Name}}_handler(
