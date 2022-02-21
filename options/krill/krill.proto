@@ -1,0 +1,135 @@
+
+syntax = "proto2";
+
+package krill;
+option go_package = "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill;krill";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+  optional string krill_app_name = 66041;
+}
+
+extend google.protobuf.ServiceOptions {
+  optional Service service = 66041;
+}
+
+extend google.protobuf.MethodOptions {
+  optional Method method = 66041;
+  optional OpenapiMethod openapi_method = 66042;
+}
+
+extend google.protobuf.MessageOptions {
+  optional OpenapiMessage openapi_message = 66041;
+}
+
+extend google.protobuf.FieldOptions {
+  optional Database database = 66041;
+  optional OpenapiField openapi = 66042;
+}
+
+message Database {
+  optional string name = 1;
+}
+
+message Service {
+  optional ServiceHttp http = 1;
+}
+
+message Method {
+  optional MethodHttp http = 1;
+}
+
+message MethodHttp {
+  optional bool auth = 1;
+  repeated string scope = 2;
+  repeated Parameter header = 3;
+}
+
+message ServiceHttp {
+  optional ServiceAuthentication authentication = 1;
+  repeated Parameter header = 2;
+}
+
+message ServiceAuthentication {
+  optional HttpAuthenticationType type = 1;
+}
+
+enum HttpAuthenticationType {
+  HTTP_AUTHENTICATION_TYPE_UNSPECIFIED = 0;
+  HTTP_AUTHENTICATION_TYPE_BEARER = 1;
+}
+
+message Parameter {
+  required string name = 1;
+  optional ParameterType type = 2;
+  optional bool required = 3;
+}
+
+enum ParameterType {
+  PARAMETER_TYPE_UNSPECIFIED = 0;
+  PARAMETER_TYPE_STRING = 1;
+  PARAMETER_TYPE_NUMBER = 2;
+}
+
+message OpenapiMethod {
+  required Path path = 1;
+  repeated Response response = 2;
+}
+
+message Path {
+  required string summary = 1;
+  required string description = 2;
+  repeated string tags = 3;
+}
+
+message Response {
+  required ResponseCode code = 1;
+  required string description = 2;
+}
+
+enum ResponseCode {
+  RESPONSE_CODE_OK = 0;
+  RESPONSE_CODE_NOT_FOUND = 1;
+  RESPONSE_CODE_UNAUTHORIZED = 2;
+  RESPONSE_CODE_BAD_REQUEST = 3;
+  RESPONSE_CODE_PRECONDITION_FAILED = 4;
+  RESPONSE_CODE_INTERNAL_ERROR = 5;
+}
+
+message OpenapiMessage {
+  required Operation operation = 1;
+}
+
+message Operation {
+  required RequestBody request_body = 1;
+}
+
+message RequestBody {
+  required string description = 1;
+}
+
+message OpenapiField {
+  required Property property = 1;
+}
+
+message Property {
+  required string description = 1;
+  optional string example = 2;
+  required PropertyFormat format = 3;
+  optional bool hide_from_schema = 4;
+}
+
+enum PropertyFormat {
+  PROPERTY_FORMAT_UNSPECIFIED = 0;
+  PROPERTY_FORMAT_INT32 = 1;
+  PROPERTY_FORMAT_INT64 = 2;
+  PROPERTY_FORMAT_FLOAT = 3;
+  PROPERTY_FORMAT_DOUBLE = 4;
+  PROPERTY_FORMAT_BYTE = 5;
+  PROPERTY_FORMAT_BINARY = 6;
+  PROPERTY_FORMAT_DATE = 7;
+  PROPERTY_FORMAT_DATE_TIME = 8;
+  PROPERTY_FORMAT_PASSWORD = 9;
+}
+

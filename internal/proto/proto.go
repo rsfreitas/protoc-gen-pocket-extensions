@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-micro-extensions/options/micro"
+	"github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
 type Spec struct {
@@ -25,7 +25,7 @@ type FieldAttribute struct {
 }
 
 func GetPackageName(plugin *protogen.Plugin) (string, error) {
-	file, err := getProtoFile(plugin, false)
+	file, err := GetProtoFile(plugin, false)
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +34,7 @@ func GetPackageName(plugin *protogen.Plugin) (string, error) {
 }
 
 func GetProtoFilePath(plugin *protogen.Plugin) (string, error) {
-	file, err := getProtoFile(plugin, false)
+	file, err := GetProtoFile(plugin, false)
 	if err != nil {
 		return "", err
 	}
@@ -74,11 +74,12 @@ func getFieldAttributesFromMessage(packageName string, message *descriptor.Descr
 	return fields
 }
 
-func getFieldBuildrsDatabaseExtension(field *descriptor.FieldDescriptorProto) *micro.Database {
+// TODO: move this to internal/krill package
+func getFieldBuildrsDatabaseExtension(field *descriptor.FieldDescriptorProto) *krill.Database {
 	if field != nil && field.Options != nil {
-		f := proto.GetExtension(field.Options, micro.E_Database)
+		f := proto.GetExtension(field.Options, krill.E_Database)
 
-		if p, ok := f.(*micro.Database); ok {
+		if p, ok := f.(*krill.Database); ok {
 			return p
 		}
 	}
@@ -87,7 +88,7 @@ func getFieldBuildrsDatabaseExtension(field *descriptor.FieldDescriptorProto) *m
 }
 
 func Parse(plugin *protogen.Plugin) (*Spec, error) {
-	file, err := getProtoFile(plugin, true)
+	file, err := GetProtoFile(plugin, true)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +98,9 @@ func Parse(plugin *protogen.Plugin) (*Spec, error) {
 		return nil, err
 	}
 
-	appName := getMicroFileOptions(file.Proto)
+	appName := getKrillFileOptions(file.Proto)
 	if appName == "" {
-		return nil, errors.New("cannot handle a service without 'micro.micro_app_name' option")
+		return nil, errors.New("cannot handle a service without 'krill.krill_app_name' option")
 	}
 
 	return &Spec{
@@ -110,7 +111,7 @@ func Parse(plugin *protogen.Plugin) (*Spec, error) {
 	}, nil
 }
 
-func getProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, error) {
+func GetProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, error) {
 	if len(plugin.Files) == 0 {
 		return nil, errors.New("cannot find the module name without .proto files")
 	}
@@ -130,9 +131,10 @@ func getProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, er
 	return file, nil
 }
 
-func getMicroFileOptions(file *descriptor.FileDescriptorProto) string {
+// TODO: move to internal/krill package
+func getKrillFileOptions(file *descriptor.FileDescriptorProto) string {
 	if file.Options != nil {
-		n := proto.GetExtension(file.Options, micro.E_MicroAppName)
+		n := proto.GetExtension(file.Options, krill.E_KrillAppName)
 		if n != nil {
 			return n.(string)
 		}

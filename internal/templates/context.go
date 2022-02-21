@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rsfreitas/go-micro-utils/template"
-	"github.com/rsfreitas/protoc-gen-micro-extensions/internal/proto"
+	"github.com/rsfreitas/go-krill-utils/template"
+
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/openapi"
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/proto"
 )
 
 // The context availble inside all template files.
@@ -20,6 +22,7 @@ type context struct {
 	ProtoIncludePaths []string
 	FieldAttributes   []*proto.FieldAttribute
 	Methods           []*proto.Method
+	Openapi           *openapi.Openapi
 
 	exportOpenapi bool
 	exportRust    bool
@@ -94,6 +97,17 @@ func buildContext(options *LoadOptions) (*context, error) {
 		ctx.GrpcServiceName = spec.ServiceName
 		ctx.Module = filterPackageName(spec.PackageName)
 	}
+
+	file, err := proto.GetProtoFile(options.Plugin, true)
+	if err != nil {
+		return nil, err
+	}
+
+	opApi, err := openapi.FromProto(file, options.Plugin)
+	if err != nil {
+		return nil, err
+	}
+	ctx.Openapi = opApi
 
 	return ctx, nil
 }

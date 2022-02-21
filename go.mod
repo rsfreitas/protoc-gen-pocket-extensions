@@ -1,12 +1,12 @@
-module github.com/rsfreitas/protoc-gen-micro-extensions
+module github.com/rsfreitas/protoc-gen-krill-extensions
 
 go 1.16
 
 require (
-	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/golang/protobuf v1.5.2
-	github.com/iancoleman/strcase v0.2.0 // indirect
-	github.com/rsfreitas/go-micro-utils v0.0.0-20220204114246-3eb09b6bb34c
+	github.com/iancoleman/strcase v0.2.0
+	github.com/rsfreitas/go-krill-utils v0.0.0-20220218180107-ff7d2dba6df6
 	google.golang.org/genproto v0.0.0-20220118154757-00ab72f36ad5
 	google.golang.org/protobuf v1.27.1
+	gopkg.in/yaml.v2 v2.2.3
 )

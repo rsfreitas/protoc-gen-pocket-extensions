@@ -6,7 +6,7 @@ import (
 	//	"github.com/go-playground/validator/v10"
 	"google.golang.org/protobuf/compiler/protogen"
 
-	"github.com/rsfreitas/go-micro-utils/template"
+	"github.com/rsfreitas/go-krill-utils/template"
 )
 
 //go:embed *.tmpl

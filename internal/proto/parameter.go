@@ -5,6 +5,8 @@ import (
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
 )
 
 type Parameter struct {
@@ -119,7 +121,7 @@ func (p *Parameter) BodyInitCall() string {
 	return call
 }
 
-func parseParametersFromMessage(file *protogen.File, messageName string, extensions *methodExtensions) ([]*Parameter, error) {
+func parseParametersFromMessage(file *protogen.File, messageName string, extensions *krill.MethodExtensions) ([]*Parameter, error) {
 	//msg, msgDescriptor, err := searchPackageMessageByName(file, messageName)
 	msg, _, err := searchPackageMessageByName(file, messageName)
 	if err != nil {
@@ -144,7 +146,7 @@ func parseParametersFromMessage(file *protogen.File, messageName string, extensi
 	return parameters, nil
 }
 
-func getFieldLocation(name string, extensions *methodExtensions) ParameterLocation {
+func getFieldLocation(name string, extensions *krill.MethodExtensions) ParameterLocation {
 	var (
 		location = ParameterLocation_Body
 		found    = isIn(extensions.EndpointDetails.Parameters, name)
@@ -156,8 +158,8 @@ func getFieldLocation(name string, extensions *methodExtensions) ParameterLocati
 	if !found && extensions.EndpointDetails.Method == http.MethodGet {
 		location = ParameterLocation_Query
 	}
-	if !found && extensions.HasMicroHttpExtension() {
-		for _, p := range extensions.Micro.GetHttp().GetHeader() {
+	if !found && extensions.HasKrillHttpExtension() {
+		for _, p := range extensions.Method.GetHttp().GetHeader() {
 			if name == p.GetName() {
 				location = ParameterLocation_Header
 				break

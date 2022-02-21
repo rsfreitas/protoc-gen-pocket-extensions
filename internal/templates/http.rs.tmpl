@@ -10,12 +10,12 @@ pub async fn {{toSnake .Name}}_handler(
     {{.ProtoName}}: {{.RustType}},
 {{- end}}
 {{- if .HasAuthentication}}
-    token: micro::auth::Token,
+    token: krill::auth::Token,
 {{- end}}
 {{- if .HasBody}}
     req: rocket::serde::json::Json<crate::{{$module}}::{{.BodyArgumentType}}>,
 {{- end}}
-    service: &State<std::sync::Arc<micro::service::Service>>,
+    service: &State<std::sync::Arc<krill::service::Service>>,
     handlers: &State<Box<dyn crate::{{$module}}::{{toSnake $service}}_server::{{$service}}>>
 ) -> rocket::response::content::Json<String> {
 {{- if .NeedsInitializeInput}}
@@ -38,11 +38,11 @@ pub async fn {{toSnake .Name}}_handler(
     handler_request.extensions_mut().insert(service.inner().clone());
 
     let res = handlers.{{toSnake .Name}}(handler_request).await;
-    micro::http::response_from_rpc(res)
+    krill::http::response_from_rpc(res)
 }
 {{end}}
 pub fn http_router(
-    service: &std::sync::Arc<micro::service::Service>,
+    service: &std::sync::Arc<krill::service::Service>,
     server: Box<dyn crate::{{.Module}}::{{toSnake .GrpcServiceName}}_server::{{.GrpcServiceName}}>,
 ) -> Rocket<rocket::Build> {
     rocket::custom(service.http_config())

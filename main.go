@@ -3,7 +3,7 @@ package main
 import (
 	"google.golang.org/protobuf/compiler/protogen"
 
-	"github.com/rsfreitas/protoc-gen-micro-extensions/internal/templates"
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/templates"
 )
 
 func main() {

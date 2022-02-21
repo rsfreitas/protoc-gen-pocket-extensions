@@ -6,13 +6,15 @@ import (
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
+
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
 )
 
 type Method struct {
 	Name       string
 	Input      *MethodMessage
 	Output     *MethodMessage
-	extensions *methodExtensions
+	extensions *krill.MethodExtensions
 }
 
 type MethodMessage struct {
@@ -23,7 +25,7 @@ type MethodMessage struct {
 // HasAuthentication returns true or false if the current Method has
 // authentication enabled or not.
 func (m *Method) HasAuthentication() bool {
-	if http := m.extensions.Micro.GetHttp(); http != nil {
+	if http := m.extensions.Method.GetHttp(); http != nil {
 		return http.GetAuth()
 	}
 
@@ -163,7 +165,7 @@ func parseMethods(file *protogen.File) ([]*Method, error) {
 
 	var methods []*Method
 	for _, method := range service.Method {
-		extensions := loadMethodExtensions(method)
+		extensions := krill.GetMethodExtensions(method)
 
 		inputParameters, err := parseParametersFromMessage(file, method.GetInputType(), extensions)
 		if err != nil {

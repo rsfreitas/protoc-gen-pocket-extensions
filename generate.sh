@@ -2,7 +2,7 @@
 
 INCLUDE="-I ."
 
-(cd options/micro && protoc $INCLUDE --go_out=. --go_opt=paths=source_relative micro.proto)
+(cd options/krill && protoc $INCLUDE --go_out=. --go_opt=paths=source_relative krill.proto)
 
 exit 0
 
