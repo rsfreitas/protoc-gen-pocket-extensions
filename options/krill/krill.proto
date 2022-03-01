@@ -36,6 +36,11 @@ message Database {
 
 message Service {
   optional ServiceHttp http = 1;
+  optional CommonResponses common_responses = 2;
+}
+
+message CommonResponses {
+  repeated Response response = 1;
 }
 
 message Method {
