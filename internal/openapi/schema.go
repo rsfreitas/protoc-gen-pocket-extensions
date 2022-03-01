@@ -10,7 +10,6 @@ import (
 
 type SchemaOptions struct {
 	Required    bool
-	Expand      bool
 	Minimum     int
 	Maximum     int
 	Type        SchemaType
@@ -18,7 +17,6 @@ type SchemaOptions struct {
 	Ref         string
 	Description string
 	Example     string
-	ExpandTo    string
 	Properties  map[string]*Schema
 	Enum        []string
 	Items       *Schema
@@ -39,8 +37,6 @@ type Schema struct {
 
 	schemaType SchemaType
 	required   bool
-	expand     bool
-	expandTo   string
 }
 
 func (s *Schema) SchemaType() SchemaType {
@@ -119,14 +115,6 @@ func (s *Schema) RefName() string {
 	return parts[len(parts)-1]
 }
 
-func (s *Schema) Expand() bool {
-	return s.expand
-}
-
-func (s *Schema) ExpandTo() string {
-	return s.expandTo
-}
-
 func NewSchema(options *SchemaOptions) *Schema {
 	s := &Schema{
 		Minimum:     options.Minimum,
@@ -140,8 +128,6 @@ func NewSchema(options *SchemaOptions) *Schema {
 		Enum:        options.Enum,
 		Example:     options.Example,
 		required:    options.Required,
-		expand:      options.Expand,
-		expandTo:    options.ExpandTo,
 	}
 
 	var required []string

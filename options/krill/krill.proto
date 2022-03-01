@@ -8,6 +8,8 @@ import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.FileOptions {
   optional string krill_app_name = 66041;
+  optional string krill_openapi_title = 66042;
+  optional string krill_openapi_version = 66043;
 }
 
 extend google.protobuf.ServiceOptions {
@@ -118,6 +120,8 @@ message Property {
   optional string example = 2;
   required PropertyFormat format = 3;
   optional bool hide_from_schema = 4;
+  optional PropertyLocation location = 5;
+  optional bool required = 6;
 }
 
 enum PropertyFormat {
@@ -131,5 +135,13 @@ enum PropertyFormat {
   PROPERTY_FORMAT_DATE = 7;
   PROPERTY_FORMAT_DATE_TIME = 8;
   PROPERTY_FORMAT_PASSWORD = 9;
+  PROPERTY_FORMAT_STRING = 10;
+}
+
+enum PropertyLocation {
+  PROPERTY_LOCATION_BODY = 0;
+  PROPERTY_LOCATION_HEADER = 1;
+  PROPERTY_LOCATION_PATH = 2;
+  PROPERTY_LOCATION_QUERY = 3;
 }
 

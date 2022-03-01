@@ -30,6 +30,15 @@ type HttpEndpointDetails struct {
 	Body       string
 }
 
+type MessageExtensions struct {
+	OpenapiMessage *krillpb.OpenapiMessage
+}
+
+type FieldExtensions struct {
+	Database *krillpb.Database
+	Openapi  *krillpb.OpenapiField
+}
+
 func (e *MethodExtensions) HasKrillHttpExtension() bool {
 	return e.Method != nil && e.Method.GetHttp() != nil
 }
@@ -44,6 +53,16 @@ func (e *MethodExtensions) HttpMethod() string {
 	}
 
 	return ""
+}
+
+func (f *FieldExtensions) PropertyLocation() krillpb.PropertyLocation {
+	if f.Openapi != nil {
+		if p := f.Openapi.GetProperty(); p != nil {
+			return p.GetLocation()
+		}
+	}
+
+	return krillpb.PropertyLocation_PROPERTY_LOCATION_BODY
 }
 
 func GetServiceExtensions(service *descriptor.ServiceDescriptorProto) *ServiceExtensions {
@@ -167,4 +186,32 @@ func retrieveEndpointParametersFromAdditionalBindings(rule *annotations.HttpRule
 	}
 
 	return parameters
+}
+
+func GetMessageExtensions(message *descriptor.DescriptorProto) *MessageExtensions {
+	return &MessageExtensions{
+		OpenapiMessage: getKrillOpenapiMessageExtension(message),
+	}
+}
+
+func getKrillOpenapiMessageExtension(message *descriptor.DescriptorProto) *krillpb.OpenapiMessage {
+	if message.Options != nil {
+		m := proto.GetExtension(message.Options, krillpb.E_OpenapiMessage)
+		return (m.(*krillpb.OpenapiMessage))
+	}
+
+	return nil
+}
+
+func GetFieldExtensions(field *descriptor.FieldDescriptorProto) *FieldExtensions {
+	ext := &FieldExtensions{}
+
+	if field != nil && field.Options != nil {
+		f := proto.GetExtension(field.Options, krillpb.E_Openapi)
+		if p, ok := f.(*krillpb.OpenapiField); ok {
+			ext.Openapi = p
+		}
+	}
+
+	return ext
 }
