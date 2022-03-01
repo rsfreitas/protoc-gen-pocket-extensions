@@ -47,10 +47,16 @@ func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 		return nil, err
 	}
 
+	fileExtensions := krill.GetFileExtensions(file.Proto)
+
 	return &Openapi{
 		ServiceExtensions: extensions,
 		PathItems:         operations,
 		Components:        components,
+		Info: &Info{
+			Title:   fileExtensions.OpenapiTitle,
+			Version: fileExtensions.OpenapiVersion,
+		},
 	}, nil
 }
 

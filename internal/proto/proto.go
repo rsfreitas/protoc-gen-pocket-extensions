@@ -6,10 +6,9 @@ import (
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
-	"google.golang.org/protobuf/proto"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
 )
 
 type Spec struct {
@@ -63,28 +62,16 @@ func getFieldAttributesFromMessage(packageName string, message *descriptor.Descr
 	var fields []*FieldAttribute
 
 	for _, field := range message.Field {
-		if database := getFieldBuildrsDatabaseExtension(field); database != nil {
+		extensions := krill.GetFieldExtensions(field)
+		if extensions.Database != nil {
 			fields = append(fields, &FieldAttribute{
 				Name:      fmt.Sprintf(".%v.%v.%v", packageName, message.GetName(), field.GetName()),
-				Attribute: fmt.Sprintf(`#[serde(rename(serialize = \"%v\", deserialize = \"%v\"))]`, database.GetName(), database.GetName()),
+				Attribute: fmt.Sprintf(`#[serde(rename(serialize = \"%v\", deserialize = \"%v\"))]`, extensions.Database.GetName(), extensions.Database.GetName()),
 			})
 		}
 	}
 
 	return fields
-}
-
-// TODO: move this to internal/krill package
-func getFieldBuildrsDatabaseExtension(field *descriptor.FieldDescriptorProto) *krill.Database {
-	if field != nil && field.Options != nil {
-		f := proto.GetExtension(field.Options, krill.E_Database)
-
-		if p, ok := f.(*krill.Database); ok {
-			return p
-		}
-	}
-
-	return nil
 }
 
 func Parse(plugin *protogen.Plugin) (*Spec, error) {
@@ -98,13 +85,13 @@ func Parse(plugin *protogen.Plugin) (*Spec, error) {
 		return nil, err
 	}
 
-	appName := getKrillFileOptions(file.Proto)
-	if appName == "" {
+	extensions := krill.GetFileExtensions(file.Proto)
+	if extensions.AppName == "" {
 		return nil, errors.New("cannot handle a service without 'krill.krill_app_name' option")
 	}
 
 	return &Spec{
-		AppName:     appName,
+		AppName:     extensions.AppName,
 		Methods:     methods,
 		ServiceName: file.Proto.Service[0].GetName(),
 		PackageName: file.Proto.GetPackage(),
@@ -129,18 +116,6 @@ func GetProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, er
 	}
 
 	return file, nil
-}
-
-// TODO: move to internal/krill package
-func getKrillFileOptions(file *descriptor.FileDescriptorProto) string {
-	if file.Options != nil {
-		n := proto.GetExtension(file.Options, krill.E_KrillAppName)
-		if n != nil {
-			return n.(string)
-		}
-	}
-
-	return ""
 }
 
 // searchMessageByName searches for a protobuf message by its name. It returns

@@ -11,6 +11,12 @@ import (
 	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
+type FileExtensions struct {
+	AppName        string
+	OpenapiTitle   string
+	OpenapiVersion string
+}
+
 type ServiceExtensions struct {
 	Service *krillpb.Service
 }
@@ -211,7 +217,40 @@ func GetFieldExtensions(field *descriptor.FieldDescriptorProto) *FieldExtensions
 		if p, ok := f.(*krillpb.OpenapiField); ok {
 			ext.Openapi = p
 		}
+
+		d := proto.GetExtension(field.Options, krillpb.E_Database)
+		if p, ok := d.(*krillpb.Database); ok {
+			ext.Database = p
+		}
 	}
 
 	return ext
+}
+
+func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
+	var (
+		name    string
+		title   string
+		version string
+	)
+
+	if file.Options != nil {
+		if n := proto.GetExtension(file.Options, krillpb.E_KrillAppName); n != nil {
+			name = n.(string)
+		}
+
+		if n := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiTitle); n != nil {
+			title = n.(string)
+		}
+
+		if n := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiVersion); n != nil {
+			version = n.(string)
+		}
+	}
+
+	return &FileExtensions{
+		AppName:        name,
+		OpenapiTitle:   title,
+		OpenapiVersion: version,
+	}
 }
