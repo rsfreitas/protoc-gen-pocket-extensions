@@ -103,11 +103,13 @@ func buildContext(options *LoadOptions) (*context, error) {
 		return nil, err
 	}
 
-	opApi, err := openapi.FromProto(file, options.Plugin)
-	if err != nil {
-		return nil, err
+	if options.ExportOpenapi {
+		opApi, err := openapi.FromProto(file, options.Plugin)
+		if err != nil {
+			return nil, err
+		}
+		ctx.Openapi = opApi
 	}
-	ctx.Openapi = opApi
 
 	return ctx, nil
 }
