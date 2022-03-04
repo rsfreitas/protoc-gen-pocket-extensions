@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"net/http"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -17,9 +18,22 @@ type RequestBody struct {
 
 func newRequestBody(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *krill.MethodExtensions) (*RequestBody, error) {
 	var (
-		required    = extensions.HttpMethod() == http.MethodPost
-		description = getRequestBodyDescription(method, plugin)
+		required      = extensions.HttpMethod() == http.MethodPost
+		description   = getRequestBodyDescription(method, plugin)
+		refSchemaName string
 	)
+
+	if extensions.HttpMethod() == http.MethodPost {
+		refSchemaName = method.GetInputType()
+	}
+
+	if extensions.HttpMethod() == http.MethodPut {
+		name, err := getRequestBodyRefSchemaNameForPut(method, plugin, extensions)
+		if err != nil {
+			return nil, err
+		}
+		refSchemaName = name
+	}
 
 	return &RequestBody{
 		Required:    required,
@@ -27,7 +41,7 @@ func newRequestBody(method *descriptor.MethodDescriptorProto, plugin *protogen.P
 		Content: map[string]*Media{
 			"application/json": NewMedia(
 				NewSchema(&SchemaOptions{
-					Ref: refComponentsSchemas + trimPackagePath(method.GetInputType()),
+					Ref: refComponentsSchemas + trimPackagePath(refSchemaName),
 				}),
 			),
 		},
@@ -48,4 +62,25 @@ func getRequestBodyDescription(method *descriptor.MethodDescriptorProto, plugin 
 	}
 
 	return ""
+}
+
+func getRequestBodyRefSchemaNameForPut(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *krill.MethodExtensions) (string, error) {
+	// We shouldn't find a body annotated as "*" but we suport it.
+	if extensions.EndpointDetails.Body == "*" {
+		return method.GetInputType(), nil
+	}
+
+	msgName := trimPackagePath(method.GetInputType())
+	msg := findMessageByName(msgName, plugin)
+	if msg == nil {
+		return "", fmt.Errorf("could not find message with name '%s'", msgName)
+	}
+
+	for _, f := range msg.Field {
+		if f.GetName() == extensions.EndpointDetails.Body {
+			return f.GetTypeName(), nil
+		}
+	}
+
+	return "", fmt.Errorf("could not find member '%s' for the request body", extensions.EndpointDetails.Body)
 }
