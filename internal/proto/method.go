@@ -26,7 +26,7 @@ type MethodMessage struct {
 // authentication enabled or not.
 func (m *Method) HasAuthentication() bool {
 	if http := m.extensions.Method.GetHttp(); http != nil {
-		return http.GetAuth()
+		return !http.GetNoAuth()
 	}
 
 	return false

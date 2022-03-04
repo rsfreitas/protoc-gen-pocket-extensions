@@ -100,7 +100,5 @@ components:
   {{- if $openapi.HasAuth}}
   securitySchemes:
     authorization:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+{{$openapi.SecurityScheme 6}}
   {{- end}}

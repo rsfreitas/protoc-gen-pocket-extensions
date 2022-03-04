@@ -31,7 +31,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_OK"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["200"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -45,7 +45,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_BAD_REQUEST"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["400"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -59,7 +59,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_UNAUTHORIZED"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["401"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -73,7 +73,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_NOT_FOUND"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["404"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -87,7 +87,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_PRECONDITION_FAILED"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["412"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -101,7 +101,7 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 
 	if index, ok := containsCode("RESPONSE_CODE_INTERNAL_ERROR"); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses["500"] = &Response{
+		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(

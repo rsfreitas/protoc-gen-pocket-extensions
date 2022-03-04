@@ -26,9 +26,11 @@ type Components struct {
 }
 
 func (o *Openapi) HasAuth() bool {
-	return false
-	// TODO: use extension to set this info
-	//	return !o.Info.NoAuth
+	return o.ServiceExtensions.Service != nil && o.ServiceExtensions.Service.GetSecurityScheme() != nil
+}
+
+func (o *Openapi) SecurityScheme(tabSize int) string {
+	return buildSecuritySchemeFromServiceExtensions(o.ServiceExtensions, tabSize)
 }
 
 func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {

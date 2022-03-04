@@ -36,11 +36,7 @@ message Database {
 
 message Service {
   optional ServiceHttp http = 1;
-  optional CommonResponses common_responses = 2;
-}
-
-message CommonResponses {
-  repeated Response response = 1;
+  optional SecurityScheme security_scheme = 2;
 }
 
 message Method {
@@ -48,7 +44,7 @@ message Method {
 }
 
 message MethodHttp {
-  optional bool auth = 1;
+  optional bool no_auth = 1;
   repeated string scope = 2;
   repeated Parameter header = 3;
 }
@@ -56,6 +52,36 @@ message MethodHttp {
 message ServiceHttp {
   optional ServiceAuthentication authentication = 1;
   repeated Parameter header = 2;
+}
+
+message SecurityScheme {
+  required SecuritySchemeType type = 1;
+  optional string description = 2;
+  optional string name = 3;
+  optional string in = 4;
+  optional SecuritySchemeScheme scheme = 5;
+  optional SecuritySchemeBearerFormat bearer_format = 6;
+}
+
+enum SecuritySchemeType {
+  SECURITY_SCHEME_UNSPECIFIED = 0;
+  SECURITY_SCHEME_API_KEY = 1;
+  SECURITY_SCHEME_HTTP = 2;
+  SECURITY_SCHEME_OAUTH2 = 3;
+  SECURITY_SCHEME_OPEN_ID_CONNECT = 4;
+}
+
+enum SecuritySchemeScheme {
+  SECURITY_SCHEME_SCHEME_UNSPECIFIED = 0;
+  SECURITY_SCHEME_SCHEME_BASIC = 1;
+  SECURITY_SCHEME_SCHEME_BEARER = 3;
+  SECURITY_SCHEME_SCHEME_DIGEST = 4;
+  SECURITY_SCHEME_SCHEME_OAUTH = 5;
+}
+
+enum SecuritySchemeBearerFormat {
+  SECURITY_SCHEME_BEARER_FORMAT_UNSPECIFIED = 0;
+  SECURITY_SCHEME_BEARER_FORMAT_JWT = 1;
 }
 
 message ServiceAuthentication {

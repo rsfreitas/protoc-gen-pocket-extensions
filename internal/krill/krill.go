@@ -254,3 +254,21 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 		OpenapiVersion: version,
 	}
 }
+
+func ResponseCodeToHttpCode(code krillpb.ResponseCode) string {
+	switch code {
+	case krillpb.ResponseCode_RESPONSE_CODE_OK:
+		return "200"
+	case krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND:
+		return "404"
+	case krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST:
+		return "400"
+	case krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED:
+		return "401"
+	case krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED:
+		return "412"
+	}
+
+	// Internal Error
+	return "500"
+}
