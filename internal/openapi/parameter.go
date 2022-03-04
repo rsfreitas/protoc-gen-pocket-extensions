@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"fmt"
+	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
@@ -17,11 +18,12 @@ type Parameter struct {
 	Schema      *Schema
 }
 
-func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, endpointParameters []string, hasBody bool, enums map[string][]string) ([]*Parameter, error) {
+func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, endpointParameters []string, hasBody bool, enums map[string][]string, serviceExtensions *krill.ServiceExtensions) ([]*Parameter, error) {
 	var (
-		msgName    = trimPackagePath(method.GetInputType())
-		msgSchema  = findProtogenMessageByName(msgName, plugin)
-		parameters = []*Parameter{}
+		msgName                 = trimPackagePath(method.GetInputType())
+		msgSchema               = findProtogenMessageByName(msgName, plugin)
+		parameters              = []*Parameter{}
+		globalHeaderMemberNames = serviceExtensions.GetGlobalHeaderMemberNames()
 	)
 
 	msg := findMessageByName(msgName, plugin)
@@ -45,6 +47,11 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *
 				required = true
 			}
 
+			if headerName, ok := globalHeaderMemberNames[name]; ok {
+				delete(globalHeaderMemberNames, name)
+				name = headerName
+			}
+
 			parameters = append(parameters, &Parameter{
 				Location: toOpenapiLocation(fieldExtensions.PropertyLocation().String()),
 				Name:     name,
@@ -59,7 +66,21 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *
 		}
 	}
 
+	if len(globalHeaderMemberNames) > 0 {
+		return nil, fmt.Errorf("could not find header members '%v' in message '%s'",
+			mapToString(globalHeaderMemberNames), msgName)
+	}
+
 	return parameters, nil
+}
+
+func mapToString(values map[string]string) string {
+	sl := []string{}
+	for k := range values {
+		sl = append(sl, k)
+	}
+
+	return strings.Join(sl, ", ")
 }
 
 func toOpenapiLocation(location string) string {

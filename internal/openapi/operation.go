@@ -72,8 +72,9 @@ func (o *Operation) ResponseErrorCodes() []string {
 
 func parseOperations(file *protogen.File, plugin *protogen.Plugin, enums map[string][]string) (map[string]map[string]*Operation, error) {
 	var (
-		service   = file.Proto.Service[0]
-		pathItems = make(map[string]map[string]*Operation)
+		service           = file.Proto.Service[0]
+		serviceExtensions = krill.GetServiceExtensions(service)
+		pathItems         = make(map[string]map[string]*Operation)
 	)
 
 	for _, method := range service.GetMethod() {
@@ -82,7 +83,7 @@ func parseOperations(file *protogen.File, plugin *protogen.Plugin, enums map[str
 			return nil, fmt.Errorf("cannot handle method '%s' without HTTP API definitions", method.GetName())
 		}
 
-		operation, err := newOperation(method, plugin, enums, extensions)
+		operation, err := newOperation(method, plugin, enums, serviceExtensions, extensions)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +103,7 @@ func parseOperations(file *protogen.File, plugin *protogen.Plugin, enums map[str
 	return pathItems, nil
 }
 
-func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, enums map[string][]string, extensions *krill.MethodExtensions) (*Operation, error) {
+func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, enums map[string][]string, serviceExtensions *krill.ServiceExtensions, extensions *krill.MethodExtensions) (*Operation, error) {
 	var (
 		requestBody     *RequestBody
 		securitySchemes []map[string][]string
@@ -123,6 +124,7 @@ func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plu
 		extensions.EndpointDetails.Parameters,
 		requestBody != nil,
 		enums,
+		serviceExtensions,
 	)
 	if err != nil {
 		return nil, err

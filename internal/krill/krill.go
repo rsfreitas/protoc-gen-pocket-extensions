@@ -72,6 +72,20 @@ func (f *FieldExtensions) PropertyLocation() krillpb.PropertyLocation {
 	return krillpb.PropertyLocation_PROPERTY_LOCATION_BODY
 }
 
+func (s *ServiceExtensions) GetGlobalHeaderMemberNames() map[string]string {
+	if s.Service.GetHttp() == nil || len(s.Service.GetHttp().GetHeader()) == 0 {
+		return nil
+	}
+
+	names := make(map[string]string)
+
+	for _, p := range s.Service.GetHttp().GetHeader() {
+		names[p.GetMemberName()] = p.GetName()
+	}
+
+	return names
+}
+
 func GetServiceExtensions(service *descriptor.ServiceDescriptorProto) *ServiceExtensions {
 	if service.Options != nil {
 		s := proto.GetExtension(service.Options, krillpb.E_Service)
