@@ -62,6 +62,20 @@ func (e *MethodExtensions) HttpMethod() string {
 	return ""
 }
 
+func (e *MethodExtensions) GetHeaderMemberNames() map[string]string {
+	if !e.HasKrillHttpExtension() || len(e.Method.GetHttp().GetHeader()) == 0 {
+		return nil
+	}
+
+	names := make(map[string]string)
+
+	for _, p := range e.Method.GetHttp().GetHeader() {
+		names[p.GetMemberName()] = p.GetName()
+	}
+
+	return names
+}
+
 func (f *FieldExtensions) PropertyLocation() krillpb.PropertyLocation {
 	if f.Openapi != nil {
 		if p := f.Openapi.GetProperty(); p != nil {
@@ -72,7 +86,7 @@ func (f *FieldExtensions) PropertyLocation() krillpb.PropertyLocation {
 	return krillpb.PropertyLocation_PROPERTY_LOCATION_BODY
 }
 
-func (s *ServiceExtensions) GetGlobalHeaderMemberNames() map[string]string {
+func (s *ServiceExtensions) GetHeaderMemberNames() map[string]string {
 	if s.Service.GetHttp() == nil || len(s.Service.GetHttp().GetHeader()) == 0 {
 		return nil
 	}

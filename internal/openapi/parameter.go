@@ -18,12 +18,12 @@ type Parameter struct {
 	Schema      *Schema
 }
 
-func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, endpointParameters []string, hasBody bool, enums map[string][]string, serviceExtensions *krill.ServiceExtensions) ([]*Parameter, error) {
+func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, enums map[string][]string, serviceExtensions *krill.ServiceExtensions, methodExtensions *krill.MethodExtensions) ([]*Parameter, error) {
 	var (
-		msgName                 = trimPackagePath(method.GetInputType())
-		msgSchema               = findProtogenMessageByName(msgName, plugin)
-		parameters              = []*Parameter{}
-		globalHeaderMemberNames = serviceExtensions.GetGlobalHeaderMemberNames()
+		msgName           = trimPackagePath(method.GetInputType())
+		msgSchema         = findProtogenMessageByName(msgName, plugin)
+		parameters        = []*Parameter{}
+		headerMemberNames = getHeaderMemberNames(serviceExtensions, methodExtensions)
 	)
 
 	msg := findMessageByName(msgName, plugin)
@@ -47,8 +47,8 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *
 				required = true
 			}
 
-			if headerName, ok := globalHeaderMemberNames[name]; ok {
-				delete(globalHeaderMemberNames, name)
+			if headerName, ok := headerMemberNames[name]; ok {
+				delete(headerMemberNames, name)
 				name = headerName
 			}
 
@@ -66,12 +66,25 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *
 		}
 	}
 
-	if len(globalHeaderMemberNames) > 0 {
+	if len(headerMemberNames) > 0 {
 		return nil, fmt.Errorf("could not find header members '%v' in message '%s'",
-			mapToString(globalHeaderMemberNames), msgName)
+			mapToString(headerMemberNames), msgName)
 	}
 
 	return parameters, nil
+}
+
+func getHeaderMemberNames(serviceExtensions *krill.ServiceExtensions, methodExtensions *krill.MethodExtensions) map[string]string {
+	var (
+		global = serviceExtensions.GetHeaderMemberNames()
+		local  = methodExtensions.GetHeaderMemberNames()
+	)
+
+	for k, v := range local {
+		global[k] = v
+	}
+
+	return global
 }
 
 func mapToString(values map[string]string) string {

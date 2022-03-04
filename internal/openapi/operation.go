@@ -121,10 +121,9 @@ func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plu
 	parameters, err := parseOperationParameters(
 		method,
 		plugin,
-		extensions.EndpointDetails.Parameters,
-		requestBody != nil,
 		enums,
 		serviceExtensions,
+		extensions,
 	)
 	if err != nil {
 		return nil, err
