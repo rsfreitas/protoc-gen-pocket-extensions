@@ -86,11 +86,24 @@ func parseComponents(api *protogen.File, plugin *protogen.Plugin, pathItems map[
 
 // getSchemaNamesFromPaths retrieves the names of all Schemas that all Paths are using
 func getSchemaNamesFromPaths(pathItems map[string]map[string]*Operation) []string {
-	schemas := []string{}
+	var (
+		schemas = []string{}
+		names   = make(map[string]bool)
+	)
+
 	for _, path := range pathItems {
 		for _, operation := range path {
 			schemas = append(schemas, operation.Schemas()...)
 		}
+	}
+
+	for _, n := range schemas {
+		names[n] = true
+	}
+
+	schemas = []string{}
+	for k := range names {
+		schemas = append(schemas, k)
 	}
 
 	return schemas
@@ -145,8 +158,10 @@ func buildComponentsSchemas(schemaNames []string, plugin *protogen.Plugin, enums
 				}
 
 				if refName != "" {
-					for n, s := range buildComponentsSchemas([]string{refName}, plugin, enums) {
-						schemas[n] = s
+					if _, ok := schemas[refName]; !ok {
+						for n, s := range buildComponentsSchemas([]string{refName}, plugin, enums) {
+							schemas[n] = s
+						}
 					}
 				}
 			}

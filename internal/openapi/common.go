@@ -134,7 +134,6 @@ func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions,
 		}
 
 		opts.Ref = refComponentsSchemas + trimPackagePath(field.GetTypeName())
-		opts.Type = SchemaType_Object
 	default:
 		opts.Type = SchemaType_Integer
 	}
