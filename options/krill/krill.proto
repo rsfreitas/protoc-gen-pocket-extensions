@@ -10,6 +10,7 @@ extend google.protobuf.FileOptions {
   optional string krill_app_name = 66041;
   optional string krill_openapi_title = 66042;
   optional string krill_openapi_version = 66043;
+  repeated OpenapiServer krill_openapi_server = 66044;
 }
 
 extend google.protobuf.ServiceOptions {
@@ -28,6 +29,11 @@ extend google.protobuf.MessageOptions {
 extend google.protobuf.FieldOptions {
   optional Database database = 66041;
   optional OpenapiField openapi = 66042;
+}
+
+message OpenapiServer {
+  required string url = 1;
+  optional string description = 2;
 }
 
 message Database {

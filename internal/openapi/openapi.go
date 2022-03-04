@@ -9,6 +9,7 @@ import (
 
 type Openapi struct {
 	Info              *Info
+	Servers           []*Server
 	PathItems         map[string]map[string]*Operation `yaml:"paths"`
 	Components        *Components
 	ServiceExtensions *krill.ServiceExtensions
@@ -18,6 +19,11 @@ type Info struct {
 	Title   string
 	Version string
 	NoAuth  bool
+}
+
+type Server struct {
+	Url         string
+	Description string
 }
 
 type Components struct {
@@ -59,6 +65,7 @@ func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 			Title:   fileExtensions.OpenapiTitle,
 			Version: fileExtensions.OpenapiVersion,
 		},
+		Servers: parseServersFromFileExtensions(fileExtensions),
 	}, nil
 }
 
@@ -232,4 +239,17 @@ func responseErrorComponentsSchemas(errorCodes map[string]bool) map[string]*Sche
 	}
 
 	return schemas
+}
+
+func parseServersFromFileExtensions(fileExtensions *krill.FileExtensions) []*Server {
+	var servers []*Server
+
+	for _, server := range fileExtensions.Servers {
+		servers = append(servers, &Server{
+			Url:         server.GetUrl(),
+			Description: server.GetDescription(),
+		})
+	}
+
+	return servers
 }

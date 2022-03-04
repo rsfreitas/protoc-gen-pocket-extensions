@@ -15,6 +15,7 @@ type FileExtensions struct {
 	AppName        string
 	OpenapiTitle   string
 	OpenapiVersion string
+	Servers        []*krillpb.OpenapiServer
 }
 
 type ServiceExtensions struct {
@@ -232,6 +233,7 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 		name    string
 		title   string
 		version string
+		servers []*krillpb.OpenapiServer
 	)
 
 	if file.Options != nil {
@@ -246,12 +248,17 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 		if n := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiVersion); n != nil {
 			version = n.(string)
 		}
+
+		if s := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiServer); s != nil {
+			servers = s.([]*krillpb.OpenapiServer)
+		}
 	}
 
 	return &FileExtensions{
 		AppName:        name,
 		OpenapiTitle:   title,
 		OpenapiVersion: version,
+		Servers:        servers,
 	}
 }
 
