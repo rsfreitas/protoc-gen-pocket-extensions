@@ -161,6 +161,10 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 
 	for _, f := range message.Field {
 		fieldExtensions := krill.GetFieldExtensions(f)
+		if fieldExtensions.PropertyLocation().String() != "PROPERTY_LOCATION_BODY" {
+			continue
+		}
+
 		if name, schema := fieldToSchema(f, enums, message, msgSchema, fieldExtensions); schema != nil {
 			properties[name] = schema
 		}
