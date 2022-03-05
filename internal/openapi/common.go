@@ -11,6 +11,16 @@ import (
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
 )
 
+// parserOptions is an internal helper struct to pass common arguments to all
+// function calls related to parsing the protobuf file into an OpenAPI object.
+type parserOptions struct {
+	enums             map[string][]string
+	file              *protogen.File
+	plugin            *protogen.Plugin
+	serviceExtensions *krill.ServiceExtensions
+	service           *descriptor.ServiceDescriptorProto
+}
+
 func trimPackagePath(name string) string {
 	parts := strings.Split(name, ".")
 	return parts[len(parts)-1]

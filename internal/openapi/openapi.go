@@ -41,21 +41,29 @@ func (o *Openapi) SecurityScheme(tabSize int) string {
 
 func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 	var (
-		enums      = parseEnums(plugin)
-		extensions = krill.GetServiceExtensions(file.Proto.Service[0])
+		enums          = parseEnums(plugin)
+		extensions     = krill.GetServiceExtensions(file.Proto.Service[0])
+		fileExtensions = krill.GetFileExtensions(file.Proto)
 	)
 
-	operations, err := parseOperations(file, plugin, enums)
+	// Initialize parser options that can be used throughout the parsing calls.
+	parserOptions := &parserOptions{
+		file:              file,
+		plugin:            plugin,
+		enums:             enums,
+		serviceExtensions: extensions,
+		service:           file.Proto.Service[0],
+	}
+
+	operations, err := parseOperations(parserOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	components, err := parseComponents(file, plugin, operations, enums)
+	components, err := parseComponents(parserOptions, operations)
 	if err != nil {
 		return nil, err
 	}
-
-	fileExtensions := krill.GetFileExtensions(file.Proto)
 
 	return &Openapi{
 		ServiceExtensions: extensions,
@@ -69,10 +77,10 @@ func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 	}, nil
 }
 
-func parseComponents(api *protogen.File, plugin *protogen.Plugin, pathItems map[string]map[string]*Operation, enums map[string][]string) (*Components, error) {
+func parseComponents(options *parserOptions, pathItems map[string]map[string]*Operation) (*Components, error) {
 	var (
 		errorCodes = getResponseErrorCodesFromPaths(pathItems)
-		schemas    = buildComponentsSchemas(getSchemaNamesFromPaths(pathItems), plugin, enums)
+		schemas    = buildComponentsSchemas(getSchemaNamesFromPaths(pathItems), options)
 	)
 
 	for name, schema := range responseErrorComponentsSchemas(errorCodes) {
@@ -97,6 +105,7 @@ func getSchemaNamesFromPaths(pathItems map[string]map[string]*Operation) []strin
 		}
 	}
 
+	// Remove duplicate schema names
 	for _, n := range schemas {
 		names[n] = true
 	}
@@ -139,13 +148,13 @@ func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) 
 	return codes
 }
 
-func buildComponentsSchemas(schemaNames []string, plugin *protogen.Plugin, enums map[string][]string) map[string]*Schema {
+func buildComponentsSchemas(schemaNames []string, options *parserOptions) map[string]*Schema {
 	schemas := make(map[string]*Schema)
 
 	for _, s := range schemaNames {
 		name := trimPackagePath(s)
-		if msg := findMessageByName(name, plugin); msg != nil {
-			schema := messageToSchema(msg, enums, findProtogenMessageByName(name, plugin))
+		if msg := findMessageByName(name, options.plugin); msg != nil {
+			schema := messageToSchema(msg, options.enums, findProtogenMessageByName(name, options.plugin))
 			schemas[name] = schema
 
 			for _, p := range schema.Properties {
@@ -159,7 +168,7 @@ func buildComponentsSchemas(schemaNames []string, plugin *protogen.Plugin, enums
 
 				if refName != "" {
 					if _, ok := schemas[refName]; !ok {
-						for n, s := range buildComponentsSchemas([]string{refName}, plugin, enums) {
+						for n, s := range buildComponentsSchemas([]string{refName}, options) {
 							schemas[n] = s
 						}
 					}

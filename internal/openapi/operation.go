@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
@@ -70,20 +69,16 @@ func (o *Operation) ResponseErrorCodes() []string {
 	return codes
 }
 
-func parseOperations(file *protogen.File, plugin *protogen.Plugin, enums map[string][]string) (map[string]map[string]*Operation, error) {
-	var (
-		service           = file.Proto.Service[0]
-		serviceExtensions = krill.GetServiceExtensions(service)
-		pathItems         = make(map[string]map[string]*Operation)
-	)
+func parseOperations(options *parserOptions) (map[string]map[string]*Operation, error) {
+	pathItems := make(map[string]map[string]*Operation)
 
-	for _, method := range service.GetMethod() {
+	for _, method := range options.service.GetMethod() {
 		extensions := krill.GetMethodExtensions(method)
 		if extensions == nil {
 			return nil, fmt.Errorf("cannot handle method '%s' without HTTP API definitions", method.GetName())
 		}
 
-		operation, err := newOperation(method, plugin, enums, serviceExtensions, extensions)
+		operation, err := newOperation(method, options, extensions)
 		if err != nil {
 			return nil, err
 		}
@@ -103,28 +98,22 @@ func parseOperations(file *protogen.File, plugin *protogen.Plugin, enums map[str
 	return pathItems, nil
 }
 
-func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, enums map[string][]string, serviceExtensions *krill.ServiceExtensions, extensions *krill.MethodExtensions) (*Operation, error) {
+func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptions, extensions *krill.MethodExtensions) (*Operation, error) {
 	var (
 		requestBody     *RequestBody
 		securitySchemes []map[string][]string
+		httpMethod      = extensions.HttpMethod()
 	)
 
-	httpMethod := extensions.HttpMethod()
 	if httpMethod == http.MethodPost || httpMethod == http.MethodPut {
-		req, err := newRequestBody(method, plugin, extensions)
+		req, err := newRequestBody(method, options.plugin, extensions)
 		if err != nil {
 			return nil, err
 		}
 		requestBody = req
 	}
 
-	parameters, err := parseOperationParameters(
-		method,
-		plugin,
-		enums,
-		serviceExtensions,
-		extensions,
-	)
+	parameters, err := parseOperationParameters(method, options, extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +125,7 @@ func newOperation(method *descriptor.MethodDescriptorProto, plugin *protogen.Plu
 			})
 	}
 
-	responses, err := buildPathItemResponses(extensions, method, enums)
+	responses, err := buildPathItemResponses(extensions, method, options.enums)
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
@@ -18,15 +17,15 @@ type Parameter struct {
 	Schema      *Schema
 }
 
-func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, enums map[string][]string, serviceExtensions *krill.ServiceExtensions, methodExtensions *krill.MethodExtensions) ([]*Parameter, error) {
+func parseOperationParameters(method *descriptor.MethodDescriptorProto, options *parserOptions, methodExtensions *krill.MethodExtensions) ([]*Parameter, error) {
 	var (
 		msgName           = trimPackagePath(method.GetInputType())
-		msgSchema         = findProtogenMessageByName(msgName, plugin)
+		msgSchema         = findProtogenMessageByName(msgName, options.plugin)
 		parameters        = []*Parameter{}
-		headerMemberNames = getHeaderMemberNames(serviceExtensions, methodExtensions)
+		headerMemberNames = getHeaderMemberNames(options.serviceExtensions, methodExtensions)
 	)
 
-	msg := findMessageByName(msgName, plugin)
+	msg := findMessageByName(msgName, options.plugin)
 	if msg == nil {
 		return nil, fmt.Errorf("could not find message with name '%s'", msgName)
 	}
@@ -39,7 +38,7 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, plugin *
 			continue
 		}
 
-		if name, schema := fieldToSchema(f, enums, msg, msgSchema, fieldExtensions); schema != nil {
+		if name, schema := fieldToSchema(f, options.enums, msg, msgSchema, fieldExtensions); schema != nil {
 			required := schema.IsRequired()
 			if fieldExtensions.PropertyLocation().String() == "PROPERTY_LOCATION_PATH" {
 				// The field is always required when it's located at the endpoint
