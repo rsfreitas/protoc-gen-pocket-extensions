@@ -6,8 +6,8 @@ with [krill](https://github.com/rsfreitas/krill) framework.
 
 ## Building the plugin
 
-To build the plugin it's required to generate Go sources from the plugin's
-protobuf annotation extensions. This can be achieved by running the following
+In order to build the plugin, its protobuf annotation extensions must be
+compiled into Go sources. This can be achieved by running the following
 command:
 ```bash
 go generate ./options/krill
