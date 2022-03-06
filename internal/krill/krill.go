@@ -19,12 +19,12 @@ type FileExtensions struct {
 }
 
 type ServiceExtensions struct {
-	Service *krillpb.Service
+	Service *krillpb.HttpService
 }
 
 type MethodExtensions struct {
 	GoogleApi       *annotations.HttpRule
-	Method          *krillpb.Method
+	Method          *krillpb.HttpMethod
 	OpenapiMethod   *krillpb.OpenapiMethod
 	EndpointDetails *HttpEndpointDetails
 }
@@ -43,11 +43,12 @@ type MessageExtensions struct {
 
 type FieldExtensions struct {
 	Database *krillpb.Database
-	Openapi  *krillpb.OpenapiField
+	Openapi  *krillpb.Property
+	Http     *krillpb.HttpFieldProperty
 }
 
 func (e *MethodExtensions) HasKrillHttpExtension() bool {
-	return e.Method != nil && e.Method.GetHttp() != nil
+	return e.Method != nil
 }
 
 func (e *MethodExtensions) HttpMethodAndEndpoint() (string, string) {
@@ -63,37 +64,35 @@ func (e *MethodExtensions) HttpMethod() string {
 }
 
 func (e *MethodExtensions) GetHeaderMemberNames() map[string]string {
-	if !e.HasKrillHttpExtension() || len(e.Method.GetHttp().GetHeader()) == 0 {
+	if !e.HasKrillHttpExtension() || len(e.Method.GetHeader()) == 0 {
 		return nil
 	}
 
 	names := make(map[string]string)
 
-	for _, p := range e.Method.GetHttp().GetHeader() {
+	for _, p := range e.Method.GetHeader() {
 		names[p.GetMemberName()] = p.GetName()
 	}
 
 	return names
 }
 
-func (f *FieldExtensions) PropertyLocation() krillpb.PropertyLocation {
-	if f.Openapi != nil {
-		if p := f.Openapi.GetProperty(); p != nil {
-			return p.GetLocation()
-		}
+func (f *FieldExtensions) PropertyLocation() krillpb.HttpFieldLocation {
+	if f.Http != nil {
+		return f.Http.GetLocation()
 	}
 
-	return krillpb.PropertyLocation_PROPERTY_LOCATION_BODY
+	return krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY
 }
 
 func (s *ServiceExtensions) GetHeaderMemberNames() map[string]string {
-	if s.Service.GetHttp() == nil || len(s.Service.GetHttp().GetHeader()) == 0 {
+	if s.Service == nil || len(s.Service.GetHeader()) == 0 {
 		return nil
 	}
 
 	names := make(map[string]string)
 
-	for _, p := range s.Service.GetHttp().GetHeader() {
+	for _, p := range s.Service.GetHeader() {
 		names[p.GetMemberName()] = p.GetName()
 	}
 
@@ -102,9 +101,9 @@ func (s *ServiceExtensions) GetHeaderMemberNames() map[string]string {
 
 func GetServiceExtensions(service *descriptor.ServiceDescriptorProto) *ServiceExtensions {
 	if service.Options != nil {
-		s := proto.GetExtension(service.Options, krillpb.E_Service)
+		s := proto.GetExtension(service.Options, krillpb.E_ServiceDefinitions)
 
-		if svc, ok := s.(*krillpb.Service); ok {
+		if svc, ok := s.(*krillpb.HttpService); ok {
 			return &ServiceExtensions{
 				Service: svc,
 			}
@@ -127,17 +126,17 @@ func GetMethodExtensions(method *descriptor.MethodDescriptorProto) *MethodExtens
 
 func getKrillOpenapiMethodExtension(method *descriptor.MethodDescriptorProto) *krillpb.OpenapiMethod {
 	if method.Options != nil {
-		m := proto.GetExtension(method.Options, krillpb.E_OpenapiMethod)
+		m := proto.GetExtension(method.Options, krillpb.E_Operation)
 		return (m.(*krillpb.OpenapiMethod))
 	}
 
 	return nil
 }
 
-func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *krillpb.Method {
+func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *krillpb.HttpMethod {
 	if method.Options != nil {
-		m := proto.GetExtension(method.Options, krillpb.E_Method)
-		return (m.(*krillpb.Method))
+		m := proto.GetExtension(method.Options, krillpb.E_MethodDefinitions)
+		return (m.(*krillpb.HttpMethod))
 	}
 
 	return nil
@@ -231,7 +230,7 @@ func GetMessageExtensions(message *descriptor.DescriptorProto) *MessageExtension
 
 func getKrillOpenapiMessageExtension(message *descriptor.DescriptorProto) *krillpb.OpenapiMessage {
 	if message.Options != nil {
-		m := proto.GetExtension(message.Options, krillpb.E_OpenapiMessage)
+		m := proto.GetExtension(message.Options, krillpb.E_Message)
 		return (m.(*krillpb.OpenapiMessage))
 	}
 
@@ -242,14 +241,19 @@ func GetFieldExtensions(field *descriptor.FieldDescriptorProto) *FieldExtensions
 	ext := &FieldExtensions{}
 
 	if field != nil && field.Options != nil {
-		f := proto.GetExtension(field.Options, krillpb.E_Openapi)
-		if p, ok := f.(*krillpb.OpenapiField); ok {
+		f := proto.GetExtension(field.Options, krillpb.E_Property)
+		if p, ok := f.(*krillpb.Property); ok {
 			ext.Openapi = p
 		}
 
 		d := proto.GetExtension(field.Options, krillpb.E_Database)
 		if p, ok := d.(*krillpb.Database); ok {
 			ext.Database = p
+		}
+
+		h := proto.GetExtension(field.Options, krillpb.E_FieldDefinitions)
+		if d, ok := h.(*krillpb.HttpFieldProperty); ok {
+			ext.Http = d
 		}
 	}
 
@@ -265,19 +269,19 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 	)
 
 	if file.Options != nil {
-		if n := proto.GetExtension(file.Options, krillpb.E_KrillAppName); n != nil {
+		if n := proto.GetExtension(file.Options, krillpb.E_AppName); n != nil {
 			name = n.(string)
 		}
 
-		if n := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiTitle); n != nil {
+		if n := proto.GetExtension(file.Options, krillpb.E_Title); n != nil {
 			title = n.(string)
 		}
 
-		if n := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiVersion); n != nil {
+		if n := proto.GetExtension(file.Options, krillpb.E_Version); n != nil {
 			version = n.(string)
 		}
 
-		if s := proto.GetExtension(file.Options, krillpb.E_KrillOpenapiServer); s != nil {
+		if s := proto.GetExtension(file.Options, krillpb.E_Server); s != nil {
 			servers = s.([]*krillpb.OpenapiServer)
 		}
 	}

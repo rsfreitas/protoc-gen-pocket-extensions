@@ -7,6 +7,7 @@ import (
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
 type Parameter struct {
@@ -34,13 +35,13 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, options 
 		fieldExtensions := krill.GetFieldExtensions(f)
 
 		// We don't need to parse body parameters
-		if fieldExtensions.PropertyLocation().String() == "PROPERTY_LOCATION_BODY" {
+		if fieldExtensions.PropertyLocation() == krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY {
 			continue
 		}
 
 		if name, schema := fieldToSchema(f, options.enums, msg, msgSchema, fieldExtensions); schema != nil {
 			required := schema.IsRequired()
-			if fieldExtensions.PropertyLocation().String() == "PROPERTY_LOCATION_PATH" {
+			if fieldExtensions.PropertyLocation() == krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_PATH {
 				// The field is always required when it's located at the endpoint
 				// path
 				required = true
@@ -52,7 +53,7 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, options 
 			}
 
 			parameters = append(parameters, &Parameter{
-				Location: toOpenapiLocation(fieldExtensions.PropertyLocation().String()),
+				Location: toOpenapiLocation(fieldExtensions.PropertyLocation()),
 				Name:     name,
 				Schema: NewSchema(&SchemaOptions{
 					Type:    schema.SchemaType(),
@@ -95,18 +96,18 @@ func mapToString(values map[string]string) string {
 	return strings.Join(sl, ", ")
 }
 
-func toOpenapiLocation(location string) string {
+func toOpenapiLocation(location krillpb.HttpFieldLocation) string {
 	switch location {
-	case "PROPERTY_LOCATION_BODY":
+	case krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY:
 		return "body"
 
-	case "PROPERTY_LOCATION_PATH":
+	case krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_PATH:
 		return "path"
 
-	case "PROPERTY_LOCATION_HEADER":
+	case krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_HEADER:
 		return "header"
 
-	case "PROPERTY_LOCATION_QUERY":
+	case krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_QUERY:
 		return "query"
 	}
 

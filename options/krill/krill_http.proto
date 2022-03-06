@@ -1,0 +1,96 @@
+
+// krill Openapi protobuf annotations.
+//
+// In order to avoid conflicts with custom extend fields, every proto file must
+// have its own unique initial field value.
+//
+// All extensions of this file must start with: 76041
+
+syntax = "proto2";
+
+package krill.http;
+option go_package = "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill;krill";
+
+import "google/protobuf/descriptor.proto";
+
+// Annotations to be used inside a service block.
+extend google.protobuf.ServiceOptions {
+  optional HttpService service_definitions = 76041;
+}
+
+message HttpService {
+  repeated HttpParameter header = 1;
+  optional HttpSecurityScheme security_scheme = 2;
+}
+
+// Annotations to be used inside a RPC declaration block.
+extend google.protobuf.MethodOptions {
+  optional HttpMethod method_definitions = 76041;
+}
+
+message HttpMethod {
+  optional bool no_auth = 1;
+  repeated string scope = 2;
+  repeated HttpParameter header = 3;
+}
+
+message HttpParameter {
+  required string name = 1;
+  required string member_name = 2;
+  optional HttpParameterType type = 3;
+  optional bool required = 4;
+}
+
+enum HttpParameterType {
+  HTTP_PARAMETER_TYPE_UNSPECIFIED = 0;
+  HTTP_PARAMETER_TYPE_STRING = 1;
+  HTTP_PARAMETER_TYPE_NUMBER = 2;
+}
+
+message HttpSecurityScheme {
+  required HttpSecuritySchemeType type = 1;
+  optional string description = 2;
+  optional string name = 3;
+  optional string in = 4;
+  optional HttpSecuritySchemeScheme scheme = 5;
+  optional HttpSecuritySchemeBearerFormat bearer_format = 6;
+}
+
+enum HttpSecuritySchemeType {
+  HTTP_SECURITY_SCHEME_UNSPECIFIED = 0;
+  HTTP_SECURITY_SCHEME_API_KEY = 1;
+  HTTP_SECURITY_SCHEME_HTTP = 2;
+  HTTP_SECURITY_SCHEME_OAUTH2 = 3;
+  HTTP_SECURITY_SCHEME_OPEN_ID_CONNECT = 4;
+}
+
+enum HttpSecuritySchemeScheme {
+  HTTP_SECURITY_SCHEME_SCHEME_UNSPECIFIED = 0;
+  HTTP_SECURITY_SCHEME_SCHEME_BASIC = 1;
+  HTTP_SECURITY_SCHEME_SCHEME_BEARER = 3;
+  HTTP_SECURITY_SCHEME_SCHEME_DIGEST = 4;
+  HTTP_SECURITY_SCHEME_SCHEME_OAUTH = 5;
+}
+
+enum HttpSecuritySchemeBearerFormat {
+  HTTP_SECURITY_SCHEME_BEARER_FORMAT_UNSPECIFIED = 0;
+  HTTP_SECURITY_SCHEME_BEARER_FORMAT_JWT = 1;
+}
+
+// Annotations to be used at a message member (field) declaration.
+extend google.protobuf.FieldOptions {
+  optional HttpFieldProperty field_definitions = 76041;
+}
+
+message HttpFieldProperty {
+  optional HttpFieldLocation location = 1;
+}
+
+// Supported location of a property inside a request.
+enum HttpFieldLocation {
+  HTTP_FIELD_LOCATION_BODY = 0;
+  HTTP_FIELD_LOCATION_HEADER = 1;
+  HTTP_FIELD_LOCATION_PATH = 2;
+  HTTP_FIELD_LOCATION_QUERY = 3;
+}
+

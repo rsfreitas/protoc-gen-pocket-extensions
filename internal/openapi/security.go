@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
 func buildSecuritySchemeFromServiceExtensions(serviceExtensions *krill.ServiceExtensions, tabSize int) string {
@@ -20,10 +21,9 @@ func buildSecuritySchemeFromServiceExtensions(serviceExtensions *krill.ServiceEx
 
 func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]string {
 	attrs := make(map[string]string)
-	schemeType := serviceExtensions.Service.GetSecurityScheme().GetType()
 
-	switch schemeType.String() {
-	case "SECURITY_SCHEME_HTTP":
+	switch serviceExtensions.Service.GetSecurityScheme().GetType() {
+	case krillpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_HTTP:
 		attrs["type"] = "http"
 
 		httpScheme := httpSchemeToString(serviceExtensions)
@@ -33,12 +33,9 @@ func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]
 			attrs["bearerFormat"] = bearerFormatToString(serviceExtensions)
 		}
 
-	case "SECURITY_SCHEME_API_KEY":
+	case krillpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_API_KEY:
 		attrs["name"] = serviceExtensions.Service.GetSecurityScheme().GetName()
 		attrs["in"] = serviceExtensions.Service.GetSecurityScheme().GetIn()
-
-	case "SECURITY_SCHEME_OAUTH2":
-	case "SECURITY_SCHEME_OPEN_ID_CONNECT":
 	}
 
 	if description := serviceExtensions.Service.GetSecurityScheme().GetDescription(); description != "" {
@@ -49,14 +46,14 @@ func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]
 }
 
 func httpSchemeToString(serviceExtensions *krill.ServiceExtensions) string {
-	switch serviceExtensions.Service.GetSecurityScheme().GetScheme().String() {
-	case "SECURITY_SCHEME_SCHEME_BASIC":
+	switch serviceExtensions.Service.GetSecurityScheme().GetScheme() {
+	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BASIC:
 		return "basic"
-	case "SECURITY_SCHEME_SCHEME_BEARER":
+	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BEARER:
 		return "bearer"
-	case "SECURITY_SCHEME_SCHEME_DIGEST":
+	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_DIGEST:
 		return "digest"
-	case "SECURITY_SCHEME_SCHEME_OAUTH":
+	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_OAUTH:
 		return "oauth"
 	}
 
@@ -64,8 +61,8 @@ func httpSchemeToString(serviceExtensions *krill.ServiceExtensions) string {
 }
 
 func bearerFormatToString(serviceExtensions *krill.ServiceExtensions) string {
-	switch serviceExtensions.Service.GetSecurityScheme().GetBearerFormat().String() {
-	case "SECURITY_SCHEME_BEARER_FORMAT_JWT":
+	switch serviceExtensions.Service.GetSecurityScheme().GetBearerFormat() {
+	case krillpb.HttpSecuritySchemeBearerFormat_HTTP_SECURITY_SCHEME_BEARER_FORMAT_JWT:
 		return "jwt"
 	}
 

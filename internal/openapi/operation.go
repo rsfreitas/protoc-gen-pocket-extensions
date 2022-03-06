@@ -121,7 +121,7 @@ func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptio
 	if extensions.HasKrillHttpExtension() {
 		securitySchemes = append(securitySchemes,
 			map[string][]string{
-				"authorization": extensions.Method.GetHttp().GetScope(),
+				"authorization": extensions.Method.GetScope(),
 			})
 	}
 
@@ -132,10 +132,10 @@ func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptio
 
 	return &Operation{
 		Name:             extensions.HttpMethod(),
-		Description:      extensions.OpenapiMethod.GetPath().GetDescription(),
-		Summary:          extensions.OpenapiMethod.GetPath().GetSummary(),
+		Description:      extensions.OpenapiMethod.GetDescription(),
+		Summary:          extensions.OpenapiMethod.GetSummary(),
 		Id:               method.GetName(),
-		Tags:             extensions.OpenapiMethod.GetPath().GetTags(),
+		Tags:             extensions.OpenapiMethod.GetTags(),
 		RequestBody:      requestBody,
 		Parameters:       parameters,
 		SecuritySchemes:  securitySchemes,

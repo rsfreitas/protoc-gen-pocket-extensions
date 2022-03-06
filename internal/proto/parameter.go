@@ -159,7 +159,7 @@ func getFieldLocation(name string, extensions *krill.MethodExtensions) Parameter
 		location = ParameterLocation_Query
 	}
 	if !found && extensions.HasKrillHttpExtension() {
-		for _, p := range extensions.Method.GetHttp().GetHeader() {
+		for _, p := range extensions.Method.GetHeader() {
 			if name == p.GetName() {
 				location = ParameterLocation_Header
 				break

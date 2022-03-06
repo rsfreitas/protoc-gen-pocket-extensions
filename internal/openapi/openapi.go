@@ -5,6 +5,7 @@ import (
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
 type Openapi struct {
@@ -69,11 +70,11 @@ func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 		ServiceExtensions: extensions,
 		PathItems:         operations,
 		Components:        components,
+		Servers:           parseServersFromFileExtensions(fileExtensions),
 		Info: &Info{
 			Title:   fileExtensions.OpenapiTitle,
 			Version: fileExtensions.OpenapiVersion,
 		},
-		Servers: parseServersFromFileExtensions(fileExtensions),
 	}, nil
 }
 
@@ -122,18 +123,18 @@ func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) 
 	stringCodeToResponseCode := func(code string) string {
 		switch code {
 		case "400":
-			return "RESPONSE_CODE_BAD_REQUEST"
+			return krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String()
 		case "401":
-			return "RESPONSE_CODE_UNAUTHORIZED"
+			return krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED.String()
 		case "404":
-			return "RESPONSE_CODE_NOT_FOUND"
+			return krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND.String()
 		case "412":
-			return "RESPONSE_CODE_PRECONDITION_FAILED"
+			return krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED.String()
 		case "500":
-			return "RESPONSE_CODE_INTERNAL_ERROR"
+			return krillpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR.String()
 		}
 
-		return "RESPONSE_CODE_OK"
+		return krillpb.ResponseCode_RESPONSE_CODE_OK.String()
 	}
 
 	codes := make(map[string]bool)
@@ -185,7 +186,7 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 
 	for _, f := range message.Field {
 		fieldExtensions := krill.GetFieldExtensions(f)
-		if fieldExtensions.PropertyLocation().String() != "PROPERTY_LOCATION_BODY" {
+		if fieldExtensions.PropertyLocation() != krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY {
 			continue
 		}
 
@@ -207,7 +208,7 @@ func responseErrorComponentsSchemas(errorCodes map[string]bool) map[string]*Sche
 		schemas = make(map[string]*Schema)
 	)
 
-	if _, ok := errorCodes["RESPONSE_CODE_BAD_REQUEST"]; ok {
+	if _, ok := errorCodes[krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String()]; ok {
 		schemas["FieldValidationError"] = NewSchema(&SchemaOptions{
 			Type: SchemaType_Object,
 			Properties: map[string]*Schema{
@@ -247,7 +248,7 @@ func responseErrorComponentsSchemas(errorCodes map[string]bool) map[string]*Sche
 
 	// Remove the BAD_REQUEST error since it's the only one that uses a
 	// different schema.
-	delete(dup, "RESPONSE_CODE_BAD_REQUEST")
+	delete(dup, krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String())
 
 	if len(dup) > 0 {
 		schemas["DefaultError"] = NewSchema(&SchemaOptions{

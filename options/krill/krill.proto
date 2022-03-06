@@ -1,175 +1,30 @@
 
+// krill Openapi protobuf annotations.
+//
+// In order to avoid conflicts with custom extend fields, every proto file must
+// have its own unique initial field value.
+//
+// All extensions of this file must start with: 56041
+
 syntax = "proto2";
 
-package krill;
+package krill.service;
 option go_package = "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill;krill";
 
 import "google/protobuf/descriptor.proto";
 
+// Global file annotations.
 extend google.protobuf.FileOptions {
-  optional string krill_app_name = 66041;
-  optional string krill_openapi_title = 66042;
-  optional string krill_openapi_version = 66043;
-  repeated OpenapiServer krill_openapi_server = 66044;
+  // Sets the microservice name inside the krill framework environment.
+  optional string app_name = 56041;
 }
 
-extend google.protobuf.ServiceOptions {
-  optional Service service = 66041;
-}
-
-extend google.protobuf.MethodOptions {
-  optional Method method = 66041;
-  optional OpenapiMethod openapi_method = 66042;
-}
-
-extend google.protobuf.MessageOptions {
-  optional OpenapiMessage openapi_message = 66041;
-}
-
+// Annotations to be used at a message member (field) declaration.
 extend google.protobuf.FieldOptions {
-  optional Database database = 66041;
-  optional OpenapiField openapi = 66042;
-}
-
-message OpenapiServer {
-  required string url = 1;
-  optional string description = 2;
+  optional Database database = 56041;
 }
 
 message Database {
   optional string name = 1;
-}
-
-message Service {
-  optional ServiceHttp http = 1;
-  optional SecurityScheme security_scheme = 2;
-}
-
-message Method {
-  optional MethodHttp http = 1;
-}
-
-message MethodHttp {
-  optional bool no_auth = 1;
-  repeated string scope = 2;
-  repeated Parameter header = 3;
-}
-
-message ServiceHttp {
-  repeated Parameter header = 1;
-}
-
-message SecurityScheme {
-  required SecuritySchemeType type = 1;
-  optional string description = 2;
-  optional string name = 3;
-  optional string in = 4;
-  optional SecuritySchemeScheme scheme = 5;
-  optional SecuritySchemeBearerFormat bearer_format = 6;
-}
-
-enum SecuritySchemeType {
-  SECURITY_SCHEME_UNSPECIFIED = 0;
-  SECURITY_SCHEME_API_KEY = 1;
-  SECURITY_SCHEME_HTTP = 2;
-  SECURITY_SCHEME_OAUTH2 = 3;
-  SECURITY_SCHEME_OPEN_ID_CONNECT = 4;
-}
-
-enum SecuritySchemeScheme {
-  SECURITY_SCHEME_SCHEME_UNSPECIFIED = 0;
-  SECURITY_SCHEME_SCHEME_BASIC = 1;
-  SECURITY_SCHEME_SCHEME_BEARER = 3;
-  SECURITY_SCHEME_SCHEME_DIGEST = 4;
-  SECURITY_SCHEME_SCHEME_OAUTH = 5;
-}
-
-enum SecuritySchemeBearerFormat {
-  SECURITY_SCHEME_BEARER_FORMAT_UNSPECIFIED = 0;
-  SECURITY_SCHEME_BEARER_FORMAT_JWT = 1;
-}
-
-message Parameter {
-  required string name = 1;
-  required string member_name = 2;
-  optional ParameterType type = 3;
-  optional bool required = 4;
-}
-
-enum ParameterType {
-  PARAMETER_TYPE_UNSPECIFIED = 0;
-  PARAMETER_TYPE_STRING = 1;
-  PARAMETER_TYPE_NUMBER = 2;
-}
-
-message OpenapiMethod {
-  required Path path = 1;
-  repeated Response response = 2;
-}
-
-message Path {
-  required string summary = 1;
-  required string description = 2;
-  repeated string tags = 3;
-}
-
-message Response {
-  required ResponseCode code = 1;
-  required string description = 2;
-}
-
-enum ResponseCode {
-  RESPONSE_CODE_OK = 0;
-  RESPONSE_CODE_NOT_FOUND = 1;
-  RESPONSE_CODE_UNAUTHORIZED = 2;
-  RESPONSE_CODE_BAD_REQUEST = 3;
-  RESPONSE_CODE_PRECONDITION_FAILED = 4;
-  RESPONSE_CODE_INTERNAL_ERROR = 5;
-}
-
-message OpenapiMessage {
-  required Operation operation = 1;
-}
-
-message Operation {
-  required RequestBody request_body = 1;
-}
-
-message RequestBody {
-  required string description = 1;
-}
-
-message OpenapiField {
-  required Property property = 1;
-}
-
-message Property {
-  required string description = 1;
-  optional string example = 2;
-  required PropertyFormat format = 3;
-  optional bool hide_from_schema = 4;
-  optional PropertyLocation location = 5;
-  optional bool required = 6;
-}
-
-enum PropertyFormat {
-  PROPERTY_FORMAT_UNSPECIFIED = 0;
-  PROPERTY_FORMAT_INT32 = 1;
-  PROPERTY_FORMAT_INT64 = 2;
-  PROPERTY_FORMAT_FLOAT = 3;
-  PROPERTY_FORMAT_DOUBLE = 4;
-  PROPERTY_FORMAT_BYTE = 5;
-  PROPERTY_FORMAT_BINARY = 6;
-  PROPERTY_FORMAT_DATE = 7;
-  PROPERTY_FORMAT_DATE_TIME = 8;
-  PROPERTY_FORMAT_PASSWORD = 9;
-  PROPERTY_FORMAT_STRING = 10;
-}
-
-enum PropertyLocation {
-  PROPERTY_LOCATION_BODY = 0;
-  PROPERTY_LOCATION_HEADER = 1;
-  PROPERTY_LOCATION_PATH = 2;
-  PROPERTY_LOCATION_QUERY = 3;
 }
 

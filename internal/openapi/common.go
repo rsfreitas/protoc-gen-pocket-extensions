@@ -9,6 +9,7 @@ import (
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
 )
 
 // parserOptions is an internal helper struct to pass common arguments to all
@@ -54,7 +55,6 @@ func fieldToSchema(field *descriptor.FieldDescriptorProto, enums map[string][]st
 	var (
 		fieldName = field.GetName()
 		opts      = &SchemaOptions{}
-		property  = fieldExtensions.Openapi.GetProperty()
 	)
 
 	parseFieldType(field, opts, fieldExtensions)
@@ -86,18 +86,18 @@ func fieldToSchema(field *descriptor.FieldDescriptorProto, enums map[string][]st
 		opts.Required = true
 	}
 
-	if property != nil {
-		if property.GetHideFromSchema() {
+	if fieldExtensions.Openapi != nil {
+		if fieldExtensions.Openapi.GetHideFromSchema() {
 			return "", nil
 		}
 
-		opts.Example = property.GetExample()
-		opts.Description = property.GetDescription()
+		opts.Example = fieldExtensions.Openapi.GetExample()
+		opts.Description = fieldExtensions.Openapi.GetDescription()
 
 		if opts.Format == "" {
-			format := property.GetFormat().String()
-			if format != "PROPERTY_FORMAT_UNSPECIFIED" && format != "PROPERTY_FORMAT_STRING" {
-				opts.Format = strcase.ToKebab(strings.TrimPrefix(format, "PROPERTY_FORMAT_"))
+			format := fieldExtensions.Openapi.GetFormat()
+			if format != krillpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED && format != krillpb.PropertyFormat_PROPERTY_FORMAT_STRING {
+				opts.Format = strcase.ToKebab(strings.TrimPrefix(format.String(), "PROPERTY_FORMAT_"))
 			}
 		}
 
@@ -151,8 +151,8 @@ func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions,
 
 func isFieldRequired(fieldExtensions *krill.FieldExtensions) bool {
 	if fieldExtensions != nil && fieldExtensions.Openapi != nil {
-		if p := fieldExtensions.Openapi.GetProperty(); p != nil {
-			return p.GetRequired()
+		if fieldExtensions.Openapi != nil {
+			return fieldExtensions.Openapi.GetRequired()
 		}
 	}
 

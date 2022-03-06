@@ -1,0 +1,111 @@
+
+// krill Openapi protobuf annotations.
+//
+// In order to avoid conflicts with custom extend fields, every proto file must
+// have its own unique initial field value.
+//
+// All extensions of this file must start with: 66041
+
+syntax = "proto2";
+
+package krill.openapi;
+option go_package = "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill;krill";
+
+import "google/protobuf/descriptor.proto";
+
+// Global file annotations.
+extend google.protobuf.FileOptions {
+  // Sets the title of the OpenAPI document generated when parsing the protobuf
+  // spec.
+  optional string title = 66041;
+
+  // Sets the version of the OpenAPI document generated when parsing the
+  // protobuf spec.
+  optional string version = 66042;
+
+  // Defines one or more servers to be used inside the OpenAPI document.
+  repeated OpenapiServer server = 66043;
+}
+
+// OpenapiServer defines information that a server to be used by the OpenAPI
+// document must have.
+message OpenapiServer {
+  // url sets the server URL.
+  required string url = 1;
+
+  // description sets a custom text to describe in a few words the server.
+  optional string description = 2;
+}
+
+// Annotations to be used inside a RPC declaration block.
+extend google.protobuf.MethodOptions {
+  optional OpenapiMethod operation = 66041;
+}
+
+message OpenapiMethod {
+  required string summary = 1;
+  required string description = 2;
+  repeated string tags = 3;
+  repeated Response response = 4;
+}
+
+message Response {
+  required ResponseCode code = 1;
+  required string description = 2;
+}
+
+// All supported HTTP response codes.
+enum ResponseCode {
+  RESPONSE_CODE_OK = 0;
+  RESPONSE_CODE_NOT_FOUND = 1;
+  RESPONSE_CODE_UNAUTHORIZED = 2;
+  RESPONSE_CODE_BAD_REQUEST = 3;
+  RESPONSE_CODE_PRECONDITION_FAILED = 4;
+  RESPONSE_CODE_INTERNAL_ERROR = 5;
+}
+
+// Annotations to be used inside a message declaration block.
+extend google.protobuf.MessageOptions {
+  optional OpenapiMessage message = 66041;
+}
+
+message OpenapiMessage {
+  required Operation operation = 1;
+}
+
+message Operation {
+  required RequestBody request_body = 1;
+}
+
+message RequestBody {
+  required string description = 1;
+}
+
+// Annotations to be used at a message member (field) declaration.
+extend google.protobuf.FieldOptions {
+  optional Property property = 66041;
+}
+
+message Property {
+  required string description = 1;
+  optional string example = 2;
+  optional PropertyFormat format = 3;
+  optional bool required = 4;
+  optional bool hide_from_schema = 5;
+}
+
+// Supported formats of a property.
+enum PropertyFormat {
+  PROPERTY_FORMAT_UNSPECIFIED = 0;
+  PROPERTY_FORMAT_INT32 = 1;
+  PROPERTY_FORMAT_INT64 = 2;
+  PROPERTY_FORMAT_FLOAT = 3;
+  PROPERTY_FORMAT_DOUBLE = 4;
+  PROPERTY_FORMAT_BYTE = 5;
+  PROPERTY_FORMAT_BINARY = 6;
+  PROPERTY_FORMAT_DATE = 7;
+  PROPERTY_FORMAT_DATE_TIME = 8;
+  PROPERTY_FORMAT_PASSWORD = 9;
+  PROPERTY_FORMAT_STRING = 10;
+}
+
