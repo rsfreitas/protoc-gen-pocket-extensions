@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/juliangruber/go-intersect"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/proto"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
@@ -310,4 +311,30 @@ func ResponseCodeToHttpCode(code krillpb.ResponseCode) string {
 
 	// Internal Error
 	return "500"
+}
+
+func PropertyFormatTrimPrefix(format krillpb.PropertyFormat) string {
+	prefix := enumStringsIntersection(
+		krillpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED.String(),
+		krillpb.PropertyFormat_PROPERTY_FORMAT_STRING.String(),
+	)
+
+	return strings.TrimPrefix(format.String(), prefix)
+}
+
+func enumStringsIntersection(s1, s2 string) string {
+	p1 := strings.Split(s1, "_")
+	p2 := strings.Split(s2, "_")
+
+	i := intersect.Simple(p1, p2)
+	if len(i) == 0 {
+		return ""
+	}
+
+	parts := []string{}
+	for _, s := range i {
+		parts = append(parts, s.(string))
+	}
+
+	return strings.Join(parts, "_") + "_"
 }

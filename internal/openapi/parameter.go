@@ -39,7 +39,15 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, options 
 			continue
 		}
 
-		if name, schema := fieldToSchema(f, options.enums, msg, msgSchema, fieldExtensions); schema != nil {
+		schemaOptions := &fieldToSchemaOptions{
+			field:           f,
+			enums:           options.enums,
+			message:         msg,
+			msgSchema:       msgSchema,
+			fieldExtensions: fieldExtensions,
+		}
+
+		if name, schema := fieldToSchema(schemaOptions); schema != nil {
 			required := schema.IsRequired()
 			if fieldExtensions.PropertyLocation() == krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_PATH {
 				// The field is always required when it's located at the endpoint

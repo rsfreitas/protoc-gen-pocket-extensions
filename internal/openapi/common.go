@@ -22,6 +22,14 @@ type parserOptions struct {
 	service           *descriptor.ServiceDescriptorProto
 }
 
+type fieldToSchemaOptions struct {
+	field           *descriptor.FieldDescriptorProto
+	enums           map[string][]string
+	message         *descriptor.DescriptorProto
+	msgSchema       *protogen.Message
+	fieldExtensions *krill.FieldExtensions
+}
+
 func trimPackagePath(name string) string {
 	parts := strings.Split(name, ".")
 	return parts[len(parts)-1]
@@ -51,15 +59,15 @@ func findMessageByName(name string, plugin *protogen.Plugin) *descriptor.Descrip
 	return nil
 }
 
-func fieldToSchema(field *descriptor.FieldDescriptorProto, enums map[string][]string, message *descriptor.DescriptorProto, msgSchema *protogen.Message, fieldExtensions *krill.FieldExtensions) (string, *Schema) {
+func fieldToSchema(options *fieldToSchemaOptions) (string, *Schema) {
 	var (
-		fieldName = field.GetName()
+		fieldName = options.field.GetName()
 		opts      = &SchemaOptions{}
 	)
 
-	parseFieldType(field, opts, fieldExtensions)
+	parseFieldType(options.field, opts, options.fieldExtensions)
 
-	if field.GetLabel() == descriptor.FieldDescriptorProto_LABEL_REPEATED {
+	if options.field.GetLabel() == descriptor.FieldDescriptorProto_LABEL_REPEATED {
 		// Creates the Item.Schema
 		o := &SchemaOptions{
 			Ref: opts.Ref,
@@ -74,30 +82,30 @@ func fieldToSchema(field *descriptor.FieldDescriptorProto, enums map[string][]st
 		opts.Ref = ""
 	}
 
-	if field.GetType() == descriptor.FieldDescriptorProto_TYPE_ENUM {
-		for name, values := range enums {
-			if trimPackagePath(field.GetTypeName()) == name {
+	if options.field.GetType() == descriptor.FieldDescriptorProto_TYPE_ENUM {
+		for name, values := range options.enums {
+			if trimPackagePath(options.field.GetTypeName()) == name {
 				opts.Enum = values
 			}
 		}
 	}
 
-	if isFieldRequired(fieldExtensions) {
+	if isFieldRequired(options.fieldExtensions) {
 		opts.Required = true
 	}
 
-	if fieldExtensions.Openapi != nil {
-		if fieldExtensions.Openapi.GetHideFromSchema() {
+	if options.fieldExtensions.Openapi != nil {
+		if options.fieldExtensions.Openapi.GetHideFromSchema() {
 			return "", nil
 		}
 
-		opts.Example = fieldExtensions.Openapi.GetExample()
-		opts.Description = fieldExtensions.Openapi.GetDescription()
+		opts.Example = options.fieldExtensions.Openapi.GetExample()
+		opts.Description = options.fieldExtensions.Openapi.GetDescription()
 
 		if opts.Format == "" {
-			format := fieldExtensions.Openapi.GetFormat()
+			format := options.fieldExtensions.Openapi.GetFormat()
 			if format != krillpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED && format != krillpb.PropertyFormat_PROPERTY_FORMAT_STRING {
-				opts.Format = strcase.ToKebab(strings.TrimPrefix(format.String(), "PROPERTY_FORMAT_"))
+				opts.Format = strcase.ToKebab(krill.PropertyFormatTrimPrefix(format))
 			}
 		}
 

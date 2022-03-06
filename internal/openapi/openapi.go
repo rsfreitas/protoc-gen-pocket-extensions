@@ -119,25 +119,25 @@ func getSchemaNamesFromPaths(pathItems map[string]map[string]*Operation) []strin
 	return schemas
 }
 
-func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) map[string]bool {
-	stringCodeToResponseCode := func(code string) string {
+func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) map[krillpb.ResponseCode]bool {
+	stringCodeToResponseCode := func(code string) krillpb.ResponseCode {
 		switch code {
 		case "400":
-			return krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String()
+			return krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST
 		case "401":
-			return krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED.String()
+			return krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED
 		case "404":
-			return krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND.String()
+			return krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND
 		case "412":
-			return krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED.String()
+			return krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED
 		case "500":
-			return krillpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR.String()
+			return krillpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR
 		}
 
-		return krillpb.ResponseCode_RESPONSE_CODE_OK.String()
+		return krillpb.ResponseCode_RESPONSE_CODE_OK
 	}
 
-	codes := make(map[string]bool)
+	codes := make(map[krillpb.ResponseCode]bool)
 	for _, path := range pathItems {
 		for _, operation := range path {
 			for _, code := range operation.ResponseErrorCodes() {
@@ -190,7 +190,15 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 			continue
 		}
 
-		if name, schema := fieldToSchema(f, enums, message, msgSchema, fieldExtensions); schema != nil {
+		schemaOptions := &fieldToSchemaOptions{
+			field:           f,
+			enums:           enums,
+			message:         message,
+			msgSchema:       msgSchema,
+			fieldExtensions: fieldExtensions,
+		}
+
+		if name, schema := fieldToSchema(schemaOptions); schema != nil {
 			properties[name] = schema
 		}
 	}
@@ -202,13 +210,13 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 }
 
 // responseErrorComponentsSchemas gives all error schemas that an API must have.
-func responseErrorComponentsSchemas(errorCodes map[string]bool) map[string]*Schema {
+func responseErrorComponentsSchemas(errorCodes map[krillpb.ResponseCode]bool) map[string]*Schema {
 	var (
-		dup     = make(map[string]bool)
+		dup     = make(map[krillpb.ResponseCode]bool)
 		schemas = make(map[string]*Schema)
 	)
 
-	if _, ok := errorCodes[krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String()]; ok {
+	if _, ok := errorCodes[krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST]; ok {
 		schemas["FieldValidationError"] = NewSchema(&SchemaOptions{
 			Type: SchemaType_Object,
 			Properties: map[string]*Schema{
@@ -248,7 +256,7 @@ func responseErrorComponentsSchemas(errorCodes map[string]bool) map[string]*Sche
 
 	// Remove the BAD_REQUEST error since it's the only one that uses a
 	// different schema.
-	delete(dup, krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST.String())
+	delete(dup, krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST)
 
 	if len(dup) > 0 {
 		schemas["DefaultError"] = NewSchema(&SchemaOptions{
