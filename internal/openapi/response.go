@@ -3,8 +3,8 @@ package openapi
 import (
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
-	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
+	pocketpb "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket"
 )
 
 type Response struct {
@@ -13,10 +13,10 @@ type Response struct {
 }
 
 // buildPathItemResponses builds up all HTTP responses of a protobuf RPC method.
-func buildPathItemResponses(extensions *krill.MethodExtensions, method *descriptor.MethodDescriptorProto, enums map[string][]string) (map[string]*Response, error) {
+func buildPathItemResponses(extensions *pocket.MethodExtensions, method *descriptor.MethodDescriptorProto, enums map[string][]string) (map[string]*Response, error) {
 	// containsCode checks inside the method responses for a specific response
 	// code.
-	containsCode := func(code krillpb.ResponseCode) (int, bool) {
+	containsCode := func(code pocketpb.ResponseCode) (int, bool) {
 		for index, res := range extensions.OpenapiMethod.GetResponse() {
 			if res.GetCode() == code {
 				return index, true
@@ -30,9 +30,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		responses = make(map[string]*Response)
 	)
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_OK); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_OK); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -44,9 +44,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		}
 	}
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -58,9 +58,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		}
 	}
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -72,9 +72,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		}
 	}
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_NOT_FOUND); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -86,9 +86,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		}
 	}
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(
@@ -100,9 +100,9 @@ func buildPathItemResponses(extensions *krill.MethodExtensions, method *descript
 		}
 	}
 
-	if index, ok := containsCode(krillpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR); ok {
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
-		responses[krill.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
 			Description: res.GetDescription(),
 			Content: map[string]*Media{
 				"application/json": NewMedia(

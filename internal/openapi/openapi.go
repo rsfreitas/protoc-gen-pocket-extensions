@@ -4,8 +4,8 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
-	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
+	pocketpb "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket"
 )
 
 type Openapi struct {
@@ -13,7 +13,7 @@ type Openapi struct {
 	Servers           []*Server
 	PathItems         map[string]map[string]*Operation `yaml:"paths"`
 	Components        *Components
-	ServiceExtensions *krill.ServiceExtensions
+	ServiceExtensions *pocket.ServiceExtensions
 }
 
 type Info struct {
@@ -43,8 +43,8 @@ func (o *Openapi) SecurityScheme(tabSize int) string {
 func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 	var (
 		enums          = parseEnums(plugin)
-		extensions     = krill.GetServiceExtensions(file.Proto.Service[0])
-		fileExtensions = krill.GetFileExtensions(file.Proto)
+		extensions     = pocket.GetServiceExtensions(file.Proto.Service[0])
+		fileExtensions = pocket.GetFileExtensions(file.Proto)
 	)
 
 	// Initialize parser options that can be used throughout the parsing calls.
@@ -119,25 +119,25 @@ func getSchemaNamesFromPaths(pathItems map[string]map[string]*Operation) []strin
 	return schemas
 }
 
-func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) map[krillpb.ResponseCode]bool {
-	stringCodeToResponseCode := func(code string) krillpb.ResponseCode {
+func getResponseErrorCodesFromPaths(pathItems map[string]map[string]*Operation) map[pocketpb.ResponseCode]bool {
+	stringCodeToResponseCode := func(code string) pocketpb.ResponseCode {
 		switch code {
 		case "400":
-			return krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST
+			return pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST
 		case "401":
-			return krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED
+			return pocketpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED
 		case "404":
-			return krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND
+			return pocketpb.ResponseCode_RESPONSE_CODE_NOT_FOUND
 		case "412":
-			return krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED
+			return pocketpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED
 		case "500":
-			return krillpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR
+			return pocketpb.ResponseCode_RESPONSE_CODE_INTERNAL_ERROR
 		}
 
-		return krillpb.ResponseCode_RESPONSE_CODE_OK
+		return pocketpb.ResponseCode_RESPONSE_CODE_OK
 	}
 
-	codes := make(map[krillpb.ResponseCode]bool)
+	codes := make(map[pocketpb.ResponseCode]bool)
 	for _, path := range pathItems {
 		for _, operation := range path {
 			for _, code := range operation.ResponseErrorCodes() {
@@ -185,8 +185,8 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 	properties := make(map[string]*Schema)
 
 	for _, f := range message.Field {
-		fieldExtensions := krill.GetFieldExtensions(f)
-		if fieldExtensions.PropertyLocation() != krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY {
+		fieldExtensions := pocket.GetFieldExtensions(f)
+		if fieldExtensions.PropertyLocation() != pocketpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY {
 			continue
 		}
 
@@ -210,13 +210,13 @@ func messageToSchema(message *descriptor.DescriptorProto, enums map[string][]str
 }
 
 // responseErrorComponentsSchemas gives all error schemas that an API must have.
-func responseErrorComponentsSchemas(errorCodes map[krillpb.ResponseCode]bool) map[string]*Schema {
+func responseErrorComponentsSchemas(errorCodes map[pocketpb.ResponseCode]bool) map[string]*Schema {
 	var (
-		dup     = make(map[krillpb.ResponseCode]bool)
+		dup     = make(map[pocketpb.ResponseCode]bool)
 		schemas = make(map[string]*Schema)
 	)
 
-	if _, ok := errorCodes[krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST]; ok {
+	if _, ok := errorCodes[pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST]; ok {
 		schemas["FieldValidationError"] = NewSchema(&SchemaOptions{
 			Type: SchemaType_Object,
 			Properties: map[string]*Schema{
@@ -256,7 +256,7 @@ func responseErrorComponentsSchemas(errorCodes map[krillpb.ResponseCode]bool) ma
 
 	// Remove the BAD_REQUEST error since it's the only one that uses a
 	// different schema.
-	delete(dup, krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST)
+	delete(dup, pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST)
 
 	if len(dup) > 0 {
 		schemas["DefaultError"] = NewSchema(&SchemaOptions{
@@ -278,7 +278,7 @@ func responseErrorComponentsSchemas(errorCodes map[krillpb.ResponseCode]bool) ma
 	return schemas
 }
 
-func parseServersFromFileExtensions(fileExtensions *krill.FileExtensions) []*Server {
+func parseServersFromFileExtensions(fileExtensions *pocket.FileExtensions) []*Server {
 	var servers []*Server
 
 	for _, server := range fileExtensions.Servers {

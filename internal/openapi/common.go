@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
-	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
+	pocketpb "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket"
 )
 
 // parserOptions is an internal helper struct to pass common arguments to all
@@ -18,7 +18,7 @@ type parserOptions struct {
 	enums             map[string][]string
 	file              *protogen.File
 	plugin            *protogen.Plugin
-	serviceExtensions *krill.ServiceExtensions
+	serviceExtensions *pocket.ServiceExtensions
 	service           *descriptor.ServiceDescriptorProto
 }
 
@@ -27,7 +27,7 @@ type fieldToSchemaOptions struct {
 	enums           map[string][]string
 	message         *descriptor.DescriptorProto
 	msgSchema       *protogen.Message
-	fieldExtensions *krill.FieldExtensions
+	fieldExtensions *pocket.FieldExtensions
 }
 
 func trimPackagePath(name string) string {
@@ -104,8 +104,8 @@ func fieldToSchema(options *fieldToSchemaOptions) (string, *Schema) {
 
 		if opts.Format == "" {
 			format := options.fieldExtensions.Openapi.GetFormat()
-			if format != krillpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED && format != krillpb.PropertyFormat_PROPERTY_FORMAT_STRING {
-				opts.Format = strcase.ToKebab(krill.PropertyFormatTrimPrefix(format))
+			if format != pocketpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED && format != pocketpb.PropertyFormat_PROPERTY_FORMAT_STRING {
+				opts.Format = strcase.ToKebab(pocket.PropertyFormatTrimPrefix(format))
 			}
 		}
 
@@ -114,7 +114,7 @@ func fieldToSchema(options *fieldToSchemaOptions) (string, *Schema) {
 	return fieldName, NewSchema(opts)
 }
 
-func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions, fieldExtensions *krill.FieldExtensions) {
+func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions, fieldExtensions *pocket.FieldExtensions) {
 	switch field.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_STRING:
 		opts.Type = SchemaType_String
@@ -157,7 +157,7 @@ func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions,
 	}
 }
 
-func isFieldRequired(fieldExtensions *krill.FieldExtensions) bool {
+func isFieldRequired(fieldExtensions *pocket.FieldExtensions) bool {
 	if fieldExtensions != nil && fieldExtensions.Openapi != nil {
 		if fieldExtensions.Openapi != nil {
 			return fieldExtensions.Openapi.GetRequired()

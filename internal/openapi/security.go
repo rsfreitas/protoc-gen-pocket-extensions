@@ -3,11 +3,11 @@ package openapi
 import (
 	"fmt"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
-	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
+	pocketpb "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket"
 )
 
-func buildSecuritySchemeFromServiceExtensions(serviceExtensions *krill.ServiceExtensions, tabSize int) string {
+func buildSecuritySchemeFromServiceExtensions(serviceExtensions *pocket.ServiceExtensions, tabSize int) string {
 	s := ""
 	attrs := securitySchemeAttrs(serviceExtensions)
 	padding := buildPadding(tabSize)
@@ -19,11 +19,11 @@ func buildSecuritySchemeFromServiceExtensions(serviceExtensions *krill.ServiceEx
 	return s
 }
 
-func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]string {
+func securitySchemeAttrs(serviceExtensions *pocket.ServiceExtensions) map[string]string {
 	attrs := make(map[string]string)
 
 	switch serviceExtensions.Service.GetSecurityScheme().GetType() {
-	case krillpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_HTTP:
+	case pocketpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_HTTP:
 		attrs["type"] = "http"
 
 		httpScheme := httpSchemeToString(serviceExtensions)
@@ -33,7 +33,7 @@ func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]
 			attrs["bearerFormat"] = bearerFormatToString(serviceExtensions)
 		}
 
-	case krillpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_API_KEY:
+	case pocketpb.HttpSecuritySchemeType_HTTP_SECURITY_SCHEME_API_KEY:
 		attrs["name"] = serviceExtensions.Service.GetSecurityScheme().GetName()
 		attrs["in"] = serviceExtensions.Service.GetSecurityScheme().GetIn()
 	}
@@ -45,24 +45,24 @@ func securitySchemeAttrs(serviceExtensions *krill.ServiceExtensions) map[string]
 	return attrs
 }
 
-func httpSchemeToString(serviceExtensions *krill.ServiceExtensions) string {
+func httpSchemeToString(serviceExtensions *pocket.ServiceExtensions) string {
 	switch serviceExtensions.Service.GetSecurityScheme().GetScheme() {
-	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BASIC:
+	case pocketpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BASIC:
 		return "basic"
-	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BEARER:
+	case pocketpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_BEARER:
 		return "bearer"
-	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_DIGEST:
+	case pocketpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_DIGEST:
 		return "digest"
-	case krillpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_OAUTH:
+	case pocketpb.HttpSecuritySchemeScheme_HTTP_SECURITY_SCHEME_SCHEME_OAUTH:
 		return "oauth"
 	}
 
 	return "unspecified"
 }
 
-func bearerFormatToString(serviceExtensions *krill.ServiceExtensions) string {
+func bearerFormatToString(serviceExtensions *pocket.ServiceExtensions) string {
 	switch serviceExtensions.Service.GetSecurityScheme().GetBearerFormat() {
-	case krillpb.HttpSecuritySchemeBearerFormat_HTTP_SECURITY_SCHEME_BEARER_FORMAT_JWT:
+	case pocketpb.HttpSecuritySchemeBearerFormat_HTTP_SECURITY_SCHEME_BEARER_FORMAT_JWT:
 		return "jwt"
 	}
 

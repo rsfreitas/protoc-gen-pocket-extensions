@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
 )
 
 type Spec struct {
@@ -62,7 +62,7 @@ func getFieldAttributesFromMessage(packageName string, message *descriptor.Descr
 	var fields []*FieldAttribute
 
 	for _, field := range message.Field {
-		extensions := krill.GetFieldExtensions(field)
+		extensions := pocket.GetFieldExtensions(field)
 		if extensions.Database != nil {
 			fields = append(fields, &FieldAttribute{
 				Name:      fmt.Sprintf(".%v.%v.%v", packageName, message.GetName(), field.GetName()),
@@ -85,9 +85,9 @@ func Parse(plugin *protogen.Plugin) (*Spec, error) {
 		return nil, err
 	}
 
-	extensions := krill.GetFileExtensions(file.Proto)
+	extensions := pocket.GetFileExtensions(file.Proto)
 	if extensions.AppName == "" {
-		return nil, errors.New("cannot handle a service without 'krill.krill_app_name' option")
+		return nil, errors.New("cannot handle a service without 'pocket.pocket_app_name' option")
 	}
 
 	return &Spec{

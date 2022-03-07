@@ -1,4 +1,4 @@
-package krill
+package pocket
 
 import (
 	"regexp"
@@ -9,24 +9,24 @@ import (
 	"google.golang.org/protobuf/proto"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	krillpb "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill"
+	pocketpb "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket"
 )
 
 type FileExtensions struct {
 	AppName        string
 	OpenapiTitle   string
 	OpenapiVersion string
-	Servers        []*krillpb.OpenapiServer
+	Servers        []*pocketpb.OpenapiServer
 }
 
 type ServiceExtensions struct {
-	Service *krillpb.HttpService
+	Service *pocketpb.HttpService
 }
 
 type MethodExtensions struct {
 	GoogleApi       *annotations.HttpRule
-	Method          *krillpb.HttpMethod
-	OpenapiMethod   *krillpb.OpenapiMethod
+	Method          *pocketpb.HttpMethod
+	OpenapiMethod   *pocketpb.OpenapiMethod
 	EndpointDetails *HttpEndpointDetails
 }
 
@@ -39,13 +39,13 @@ type HttpEndpointDetails struct {
 }
 
 type MessageExtensions struct {
-	OpenapiMessage *krillpb.OpenapiMessage
+	OpenapiMessage *pocketpb.OpenapiMessage
 }
 
 type FieldExtensions struct {
-	Database *krillpb.Database
-	Openapi  *krillpb.Property
-	Http     *krillpb.HttpFieldProperty
+	Database *pocketpb.Database
+	Openapi  *pocketpb.Property
+	Http     *pocketpb.HttpFieldProperty
 }
 
 func (e *MethodExtensions) HasKrillHttpExtension() bool {
@@ -78,12 +78,12 @@ func (e *MethodExtensions) GetHeaderMemberNames() map[string]string {
 	return names
 }
 
-func (f *FieldExtensions) PropertyLocation() krillpb.HttpFieldLocation {
+func (f *FieldExtensions) PropertyLocation() pocketpb.HttpFieldLocation {
 	if f.Http != nil {
 		return f.Http.GetLocation()
 	}
 
-	return krillpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY
+	return pocketpb.HttpFieldLocation_HTTP_FIELD_LOCATION_BODY
 }
 
 func (s *ServiceExtensions) GetHeaderMemberNames() map[string]string {
@@ -102,9 +102,9 @@ func (s *ServiceExtensions) GetHeaderMemberNames() map[string]string {
 
 func GetServiceExtensions(service *descriptor.ServiceDescriptorProto) *ServiceExtensions {
 	if service.Options != nil {
-		s := proto.GetExtension(service.Options, krillpb.E_ServiceDefinitions)
+		s := proto.GetExtension(service.Options, pocketpb.E_ServiceDefinitions)
 
-		if svc, ok := s.(*krillpb.HttpService); ok {
+		if svc, ok := s.(*pocketpb.HttpService); ok {
 			return &ServiceExtensions{
 				Service: svc,
 			}
@@ -125,19 +125,19 @@ func GetMethodExtensions(method *descriptor.MethodDescriptorProto) *MethodExtens
 	}
 }
 
-func getKrillOpenapiMethodExtension(method *descriptor.MethodDescriptorProto) *krillpb.OpenapiMethod {
+func getKrillOpenapiMethodExtension(method *descriptor.MethodDescriptorProto) *pocketpb.OpenapiMethod {
 	if method.Options != nil {
-		m := proto.GetExtension(method.Options, krillpb.E_Operation)
-		return (m.(*krillpb.OpenapiMethod))
+		m := proto.GetExtension(method.Options, pocketpb.E_Operation)
+		return (m.(*pocketpb.OpenapiMethod))
 	}
 
 	return nil
 }
 
-func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *krillpb.HttpMethod {
+func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *pocketpb.HttpMethod {
 	if method.Options != nil {
-		m := proto.GetExtension(method.Options, krillpb.E_MethodDefinitions)
-		return (m.(*krillpb.HttpMethod))
+		m := proto.GetExtension(method.Options, pocketpb.E_MethodDefinitions)
+		return (m.(*pocketpb.HttpMethod))
 	}
 
 	return nil
@@ -229,10 +229,10 @@ func GetMessageExtensions(message *descriptor.DescriptorProto) *MessageExtension
 	}
 }
 
-func getKrillOpenapiMessageExtension(message *descriptor.DescriptorProto) *krillpb.OpenapiMessage {
+func getKrillOpenapiMessageExtension(message *descriptor.DescriptorProto) *pocketpb.OpenapiMessage {
 	if message.Options != nil {
-		m := proto.GetExtension(message.Options, krillpb.E_Message)
-		return (m.(*krillpb.OpenapiMessage))
+		m := proto.GetExtension(message.Options, pocketpb.E_Message)
+		return (m.(*pocketpb.OpenapiMessage))
 	}
 
 	return nil
@@ -242,18 +242,18 @@ func GetFieldExtensions(field *descriptor.FieldDescriptorProto) *FieldExtensions
 	ext := &FieldExtensions{}
 
 	if field != nil && field.Options != nil {
-		f := proto.GetExtension(field.Options, krillpb.E_Property)
-		if p, ok := f.(*krillpb.Property); ok {
+		f := proto.GetExtension(field.Options, pocketpb.E_Property)
+		if p, ok := f.(*pocketpb.Property); ok {
 			ext.Openapi = p
 		}
 
-		d := proto.GetExtension(field.Options, krillpb.E_Database)
-		if p, ok := d.(*krillpb.Database); ok {
+		d := proto.GetExtension(field.Options, pocketpb.E_Database)
+		if p, ok := d.(*pocketpb.Database); ok {
 			ext.Database = p
 		}
 
-		h := proto.GetExtension(field.Options, krillpb.E_FieldDefinitions)
-		if d, ok := h.(*krillpb.HttpFieldProperty); ok {
+		h := proto.GetExtension(field.Options, pocketpb.E_FieldDefinitions)
+		if d, ok := h.(*pocketpb.HttpFieldProperty); ok {
 			ext.Http = d
 		}
 	}
@@ -266,24 +266,24 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 		name    string
 		title   string
 		version string
-		servers []*krillpb.OpenapiServer
+		servers []*pocketpb.OpenapiServer
 	)
 
 	if file.Options != nil {
-		if n := proto.GetExtension(file.Options, krillpb.E_AppName); n != nil {
+		if n := proto.GetExtension(file.Options, pocketpb.E_AppName); n != nil {
 			name = n.(string)
 		}
 
-		if n := proto.GetExtension(file.Options, krillpb.E_Title); n != nil {
+		if n := proto.GetExtension(file.Options, pocketpb.E_Title); n != nil {
 			title = n.(string)
 		}
 
-		if n := proto.GetExtension(file.Options, krillpb.E_Version); n != nil {
+		if n := proto.GetExtension(file.Options, pocketpb.E_Version); n != nil {
 			version = n.(string)
 		}
 
-		if s := proto.GetExtension(file.Options, krillpb.E_Server); s != nil {
-			servers = s.([]*krillpb.OpenapiServer)
+		if s := proto.GetExtension(file.Options, pocketpb.E_Server); s != nil {
+			servers = s.([]*pocketpb.OpenapiServer)
 		}
 	}
 
@@ -295,17 +295,17 @@ func GetFileExtensions(file *descriptor.FileDescriptorProto) *FileExtensions {
 	}
 }
 
-func ResponseCodeToHttpCode(code krillpb.ResponseCode) string {
+func ResponseCodeToHttpCode(code pocketpb.ResponseCode) string {
 	switch code {
-	case krillpb.ResponseCode_RESPONSE_CODE_OK:
+	case pocketpb.ResponseCode_RESPONSE_CODE_OK:
 		return "200"
-	case krillpb.ResponseCode_RESPONSE_CODE_NOT_FOUND:
+	case pocketpb.ResponseCode_RESPONSE_CODE_NOT_FOUND:
 		return "404"
-	case krillpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST:
+	case pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST:
 		return "400"
-	case krillpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED:
+	case pocketpb.ResponseCode_RESPONSE_CODE_UNAUTHORIZED:
 		return "401"
-	case krillpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED:
+	case pocketpb.ResponseCode_RESPONSE_CODE_PRECONDITION_FAILED:
 		return "412"
 	}
 
@@ -313,10 +313,10 @@ func ResponseCodeToHttpCode(code krillpb.ResponseCode) string {
 	return "500"
 }
 
-func PropertyFormatTrimPrefix(format krillpb.PropertyFormat) string {
+func PropertyFormatTrimPrefix(format pocketpb.PropertyFormat) string {
 	prefix := enumStringsIntersection(
-		krillpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED.String(),
-		krillpb.PropertyFormat_PROPERTY_FORMAT_STRING.String(),
+		pocketpb.PropertyFormat_PROPERTY_FORMAT_UNSPECIFIED.String(),
+		pocketpb.PropertyFormat_PROPERTY_FORMAT_STRING.String(),
 	)
 
 	return strings.TrimPrefix(format.String(), prefix)

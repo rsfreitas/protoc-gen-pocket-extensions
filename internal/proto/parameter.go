@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
 )
 
 type Parameter struct {
@@ -121,7 +121,7 @@ func (p *Parameter) BodyInitCall() string {
 	return call
 }
 
-func parseParametersFromMessage(file *protogen.File, messageName string, extensions *krill.MethodExtensions) ([]*Parameter, error) {
+func parseParametersFromMessage(file *protogen.File, messageName string, extensions *pocket.MethodExtensions) ([]*Parameter, error) {
 	//msg, msgDescriptor, err := searchPackageMessageByName(file, messageName)
 	msg, _, err := searchPackageMessageByName(file, messageName)
 	if err != nil {
@@ -146,7 +146,7 @@ func parseParametersFromMessage(file *protogen.File, messageName string, extensi
 	return parameters, nil
 }
 
-func getFieldLocation(name string, extensions *krill.MethodExtensions) ParameterLocation {
+func getFieldLocation(name string, extensions *pocket.MethodExtensions) ParameterLocation {
 	var (
 		location = ParameterLocation_Body
 		found    = isIn(extensions.EndpointDetails.Parameters, name)

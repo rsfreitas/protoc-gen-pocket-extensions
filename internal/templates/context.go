@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rsfreitas/go-krill-utils/template"
+	"github.com/rsfreitas/go-pocket-utils/template"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/openapi"
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/proto"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/openapi"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/proto"
 )
 
 // The context availble inside all template files.

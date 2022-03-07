@@ -1,5 +1,5 @@
 
-// krill Openapi protobuf annotations.
+// pocket Openapi protobuf annotations.
 //
 // In order to avoid conflicts with custom extend fields, every proto file must
 // have its own unique initial field value.
@@ -8,8 +8,8 @@
 
 syntax = "proto2";
 
-package krill.http;
-option go_package = "github.com/rsfreitas/protoc-gen-krill-extensions/options/krill;krill";
+package pocket.http;
+option go_package = "github.com/rsfreitas/protoc-gen-pocket-extensions/options/pocket;pocket";
 
 import "google/protobuf/descriptor.proto";
 

@@ -1,8 +1,8 @@
-# protoc-gen-krill-extensions
+# protoc-gen-pocket-extensions
 
-**protoc-gen-krill-extensions** is a protobuf protoc plugin capable of generating
+**protoc-gen-pocket-extensions** is a protobuf protoc plugin capable of generating
 rust source code from protobuf file with the objective of help building services
-with [krill](https://github.com/rsfreitas/krill) framework.
+with [pocket](https://github.com/rsfreitas/pocket) framework.
 
 ## Building the plugin
 
@@ -10,7 +10,7 @@ In order to build the plugin, its protobuf annotation extensions must be
 compiled into Go sources. This can be achieved by running the following
 command:
 ```bash
-go generate ./options/krill
+go generate ./options/pocket
 ```
 
 After successfully generated them, the plugin can be built and installed by

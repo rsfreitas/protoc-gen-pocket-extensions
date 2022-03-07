@@ -7,14 +7,14 @@ import (
 
 	"google.golang.org/protobuf/compiler/protogen"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
 )
 
 type Method struct {
 	Name       string
 	Input      *MethodMessage
 	Output     *MethodMessage
-	extensions *krill.MethodExtensions
+	extensions *pocket.MethodExtensions
 }
 
 type MethodMessage struct {
@@ -165,7 +165,7 @@ func parseMethods(file *protogen.File) ([]*Method, error) {
 
 	var methods []*Method
 	for _, method := range service.Method {
-		extensions := krill.GetMethodExtensions(method)
+		extensions := pocket.GetMethodExtensions(method)
 
 		inputParameters, err := parseParametersFromMessage(file, method.GetInputType(), extensions)
 		if err != nil {

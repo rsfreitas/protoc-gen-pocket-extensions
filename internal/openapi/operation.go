@@ -6,7 +6,7 @@ import (
 
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
 )
 
 const (
@@ -25,7 +25,7 @@ type Operation struct {
 	RequestBody     *RequestBody          `yaml:"requestBody"`
 	SecuritySchemes []map[string][]string `yaml:"security"`
 
-	methodExtensions *krill.MethodExtensions
+	methodExtensions *pocket.MethodExtensions
 }
 
 func (o *Operation) HasRequestBody() bool {
@@ -73,7 +73,7 @@ func parseOperations(options *parserOptions) (map[string]map[string]*Operation, 
 	pathItems := make(map[string]map[string]*Operation)
 
 	for _, method := range options.service.GetMethod() {
-		extensions := krill.GetMethodExtensions(method)
+		extensions := pocket.GetMethodExtensions(method)
 		if extensions == nil {
 			return nil, fmt.Errorf("cannot handle method '%s' without HTTP API definitions", method.GetName())
 		}
@@ -98,7 +98,7 @@ func parseOperations(options *parserOptions) (map[string]map[string]*Operation, 
 	return pathItems, nil
 }
 
-func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptions, extensions *krill.MethodExtensions) (*Operation, error) {
+func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptions, extensions *pocket.MethodExtensions) (*Operation, error) {
 	var (
 		requestBody     *RequestBody
 		securitySchemes []map[string][]string

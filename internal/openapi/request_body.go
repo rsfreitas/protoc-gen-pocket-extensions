@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 	descriptor "google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/rsfreitas/protoc-gen-krill-extensions/internal/krill"
+	"github.com/rsfreitas/protoc-gen-pocket-extensions/internal/pocket"
 )
 
 type RequestBody struct {
@@ -16,7 +16,7 @@ type RequestBody struct {
 	Content     map[string]*Media
 }
 
-func newRequestBody(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *krill.MethodExtensions) (*RequestBody, error) {
+func newRequestBody(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *pocket.MethodExtensions) (*RequestBody, error) {
 	var (
 		required      = extensions.HttpMethod() == http.MethodPost
 		description   = getRequestBodyDescription(method, plugin)
@@ -49,7 +49,7 @@ func newRequestBody(method *descriptor.MethodDescriptorProto, plugin *protogen.P
 }
 
 func getRequestBodyDescription(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin) string {
-	messageExtensions := krill.GetMessageExtensions(
+	messageExtensions := pocket.GetMessageExtensions(
 		findMessageByName(trimPackagePath(method.GetInputType()), plugin),
 	)
 
@@ -64,7 +64,7 @@ func getRequestBodyDescription(method *descriptor.MethodDescriptorProto, plugin 
 	return ""
 }
 
-func getRequestBodyRefSchemaNameForPut(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *krill.MethodExtensions) (string, error) {
+func getRequestBodyRefSchemaNameForPut(method *descriptor.MethodDescriptorProto, plugin *protogen.Plugin, extensions *pocket.MethodExtensions) (string, error) {
 	// We shouldn't find a body annotated as "*" but we suport it.
 	if extensions.EndpointDetails.Body == "*" {
 		return method.GetInputType(), nil
