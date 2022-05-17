@@ -88,6 +88,10 @@ func getHeaderMemberNames(serviceExtensions *pocket.ServiceExtensions, methodExt
 		local  = methodExtensions.GetHeaderMemberNames()
 	)
 
+	if global == nil {
+		global = make(map[string]string)
+	}
+
 	for k, v := range local {
 		global[k] = v
 	}

@@ -47,6 +47,11 @@ func FromProto(file *protogen.File, plugin *protogen.Plugin) (*Openapi, error) {
 		fileExtensions = pocket.GetFileExtensions(file.Proto)
 	)
 
+	// FIXME: should we return nil here?
+	if extensions == nil {
+		return nil, nil
+	}
+
 	// Initialize parser options that can be used throughout the parsing calls.
 	parserOptions := &parserOptions{
 		file:              file,

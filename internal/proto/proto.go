@@ -28,6 +28,9 @@ func GetPackageName(plugin *protogen.Plugin) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if file == nil {
+		return "", nil
+	}
 
 	return string(file.GoPackageName), nil
 }

@@ -4,6 +4,7 @@ fn build_{{toSnake .PackageName}}() -> Result<(), Box<dyn std::error::Error>> {
         {{- if gt (len .OutputDir) 0}}
         .out_dir("{{.OutputDir}}")
         {{- end}}
+        .format(true)
         .type_attribute(".", "#[derive(serde::Serialize, serde::Deserialize)]")
         .extern_path(".google.protobuf.Any", "::prost_wkt_types::Any")
         .extern_path(".google.protobuf.Timestamp", "::prost_wkt_types::Timestamp")

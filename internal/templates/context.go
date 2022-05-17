@@ -65,6 +65,11 @@ func buildContext(options *LoadOptions) (*context, error) {
 	if err != nil {
 		return nil, err
 	}
+	if packageName == "" && err == nil {
+		// Nothing to do here because we don't recognize the file or it does not
+		// have something that we need.
+		return nil, nil
+	}
 
 	protoFilePath, err := proto.GetProtoFilePath(options.Plugin)
 	if err != nil {
@@ -107,6 +112,9 @@ func buildContext(options *LoadOptions) (*context, error) {
 		opApi, err := openapi.FromProto(file, options.Plugin)
 		if err != nil {
 			return nil, err
+		}
+		if opApi == nil {
+			return nil, nil
 		}
 		ctx.Openapi = opApi
 	}
