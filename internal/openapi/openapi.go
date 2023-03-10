@@ -101,7 +101,7 @@ func parseComponents(options *parserOptions, pathItems map[string]map[string]*Op
 // getSchemaNamesFromPaths retrieves the names of all Schemas that all Paths are using
 func getSchemaNamesFromPaths(pathItems map[string]map[string]*Operation) []string {
 	var (
-		schemas = []string{}
+		schemas []string
 		names   = make(map[string]bool)
 	)
 

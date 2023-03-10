@@ -91,7 +91,7 @@ func (m *Method) addQueryParameters(endpoint string) string {
 	hasQueryParameters := len(m.Input.Parameters) != len(m.extensions.EndpointDetails.Parameters)
 	if m.extensions.EndpointDetails.Body == "" && hasQueryParameters {
 		endpoint += "?"
-		queryParameterNames := []string{}
+		var queryParameterNames []string
 		for _, p := range m.Input.Parameters {
 			if !isIn(m.extensions.EndpointDetails.Parameters, p.ProtoName) {
 				queryParameterNames = append(queryParameterNames, p.ProtoName)
@@ -129,7 +129,7 @@ func (m *Method) BodyArgumentType() string {
 	return ""
 }
 
-// BodyArgumentType gives the variable name of the body.
+// BodyArgumentName gives the variable name of the body.
 func (m *Method) BodyArgumentName() string {
 	return m.extensions.EndpointDetails.Body
 }
@@ -144,7 +144,7 @@ func (m *Method) searchInputParameterByProtoName(protoName string) *Parameter {
 	return nil
 }
 
-// NeedsInitializeBody returns true or false if the method input struct must be
+// NeedsInitializeInput returns true or false if the method input struct must be
 // built using path and body parameters.
 func (m *Method) NeedsInitializeInput() bool {
 	return m.extensions.EndpointDetails.Body != "*"

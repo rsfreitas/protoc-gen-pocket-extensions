@@ -24,7 +24,7 @@ type FieldAttribute struct {
 }
 
 func GetPackageName(plugin *protogen.Plugin) (string, error) {
-	file, err := GetProtoFile(plugin, false)
+	file, err := GetProtoFile(plugin)
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,7 @@ func GetPackageName(plugin *protogen.Plugin) (string, error) {
 }
 
 func GetProtoFilePath(plugin *protogen.Plugin) (string, error) {
-	file, err := GetProtoFile(plugin, false)
+	file, err := GetProtoFile(plugin)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +78,7 @@ func getFieldAttributesFromMessage(packageName string, message *descriptor.Descr
 }
 
 func Parse(plugin *protogen.Plugin) (*Spec, error) {
-	file, err := GetProtoFile(plugin, true)
+	file, err := GetProtoFile(plugin)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func Parse(plugin *protogen.Plugin) (*Spec, error) {
 	}, nil
 }
 
-func GetProtoFile(plugin *protogen.Plugin, withService bool) (*protogen.File, error) {
+func GetProtoFile(plugin *protogen.Plugin) (*protogen.File, error) {
 	if len(plugin.Files) == 0 {
 		return nil, errors.New("cannot find the module name without .proto files")
 	}

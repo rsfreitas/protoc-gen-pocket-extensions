@@ -1,1 +1,3 @@
+*.swp
 options/pocket/*.pb.go
+protoc-gen-pocket-extensions

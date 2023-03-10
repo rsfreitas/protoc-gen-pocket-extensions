@@ -103,7 +103,7 @@ func buildContext(options *LoadOptions) (*context, error) {
 		ctx.Module = filterPackageName(spec.PackageName)
 	}
 
-	file, err := proto.GetProtoFile(options.Plugin, true)
+	file, err := proto.GetProtoFile(options.Plugin)
 	if err != nil {
 		return nil, err
 	}

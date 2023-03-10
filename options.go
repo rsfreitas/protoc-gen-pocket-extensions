@@ -62,7 +62,7 @@ func (p *pluginOptions) OpenapiSettings() string {
 	return *p.openapiSettingsFilename
 }
 
-func NewPluginOptions() *pluginOptions {
+func newPluginOptions() *pluginOptions {
 	o := &pluginOptions{}
 
 	o.axumFramework = o.flags.Bool("axum", false, "Enables/Disables axum framework.")
