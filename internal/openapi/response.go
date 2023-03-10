@@ -13,7 +13,7 @@ type Response struct {
 }
 
 // buildPathItemResponses builds up all HTTP responses of a protobuf RPC method.
-func buildPathItemResponses(extensions *pocket.MethodExtensions, method *descriptor.MethodDescriptorProto, enums map[string][]string) (map[string]*Response, error) {
+func buildPathItemResponses(extensions *pocket.MethodExtensions, method *descriptor.MethodDescriptorProto) (map[string]*Response, error) {
 	// containsCode checks inside the method responses for a specific response
 	// code.
 	containsCode := func(code pocketpb.ResponseCode) (int, bool) {

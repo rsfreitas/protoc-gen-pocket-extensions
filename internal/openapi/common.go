@@ -65,7 +65,7 @@ func fieldToSchema(options *fieldToSchemaOptions) (string, *Schema) {
 		opts      = &SchemaOptions{}
 	)
 
-	parseFieldType(options.field, opts, options.fieldExtensions)
+	parseFieldType(options.field, opts)
 
 	if options.field.GetLabel() == descriptor.FieldDescriptorProto_LABEL_REPEATED {
 		// Creates the Item.Schema
@@ -114,7 +114,7 @@ func fieldToSchema(options *fieldToSchemaOptions) (string, *Schema) {
 	return fieldName, NewSchema(opts)
 }
 
-func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions, fieldExtensions *pocket.FieldExtensions) {
+func parseFieldType(field *descriptor.FieldDescriptorProto, opts *SchemaOptions) {
 	switch field.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_STRING:
 		opts.Type = SchemaType_String

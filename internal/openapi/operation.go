@@ -35,7 +35,7 @@ func (o *Operation) HasRequestBody() bool {
 // Schemas returns all schemas that are referenced across this Operation
 // object.
 func (o *Operation) Schemas() []string {
-	schemas := []string{}
+	var schemas []string
 
 	// Adds the schema that the body is using
 	if o.HasRequestBody() {
@@ -57,7 +57,7 @@ func (o *Operation) Schemas() []string {
 func (o *Operation) ResponseErrorCodes() []string {
 	var (
 		strStatusOk = fmt.Sprintf("%v", http.StatusOK)
-		codes       = []string{}
+		codes       []string
 	)
 
 	for code := range o.Responses {
@@ -125,7 +125,7 @@ func newOperation(method *descriptor.MethodDescriptorProto, options *parserOptio
 			})
 	}
 
-	responses, err := buildPathItemResponses(extensions, method, options.enums)
+	responses, err := buildPathItemResponses(extensions, method)
 	if err != nil {
 		return nil, err
 	}

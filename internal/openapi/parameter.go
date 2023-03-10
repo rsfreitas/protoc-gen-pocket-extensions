@@ -22,7 +22,7 @@ func parseOperationParameters(method *descriptor.MethodDescriptorProto, options 
 	var (
 		msgName           = trimPackagePath(method.GetInputType())
 		msgSchema         = findProtogenMessageByName(msgName, options.plugin)
-		parameters        = []*Parameter{}
+		parameters        []*Parameter
 		headerMemberNames = getHeaderMemberNames(options.serviceExtensions, methodExtensions)
 	)
 
@@ -100,7 +100,7 @@ func getHeaderMemberNames(serviceExtensions *pocket.ServiceExtensions, methodExt
 }
 
 func mapToString(values map[string]string) string {
-	sl := []string{}
+	var sl []string
 	for k := range values {
 		sl = append(sl, k)
 	}

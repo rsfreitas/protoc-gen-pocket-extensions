@@ -124,7 +124,7 @@ func (s *Schema) String(prefixSpacing int) string {
 		prefix += " "
 	}
 
-	newLines := []string{}
+	var newLines []string
 	for i, line := range strings.Split(string(out), "\n") {
 		if len(line) == 0 {
 			continue

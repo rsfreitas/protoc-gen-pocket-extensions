@@ -37,7 +37,7 @@ func loadEnumsFromFile(file *protogen.File) map[string][]string {
 }
 
 func loadEnumFromProtogenEnum(enum *protogen.Enum) []string {
-	values := []string{}
+	var values []string
 	for _, v := range enum.Values {
 		values = append(values, trimEnumPrefix(v.GoIdent.GoName))
 	}

@@ -128,7 +128,7 @@ func GetMethodExtensions(method *descriptor.MethodDescriptorProto) *MethodExtens
 func getKrillOpenapiMethodExtension(method *descriptor.MethodDescriptorProto) *pocketpb.OpenapiMethod {
 	if method.Options != nil {
 		m := proto.GetExtension(method.Options, pocketpb.E_Operation)
-		return (m.(*pocketpb.OpenapiMethod))
+		return m.(*pocketpb.OpenapiMethod)
 	}
 
 	return nil
@@ -137,7 +137,7 @@ func getKrillOpenapiMethodExtension(method *descriptor.MethodDescriptorProto) *p
 func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *pocketpb.HttpMethod {
 	if method.Options != nil {
 		m := proto.GetExtension(method.Options, pocketpb.E_MethodDefinitions)
-		return (m.(*pocketpb.HttpMethod))
+		return m.(*pocketpb.HttpMethod)
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func getKrillMethodExtension(method *descriptor.MethodDescriptorProto) *pocketpb
 func getGoogleHttpAPIIfAny(msg *descriptor.MethodDescriptorProto) *annotations.HttpRule {
 	if msg.Options != nil {
 		h := proto.GetExtension(msg.Options, annotations.E_Http)
-		return (h.(*annotations.HttpRule))
+		return h.(*annotations.HttpRule)
 	}
 
 	return nil
@@ -232,7 +232,7 @@ func GetMessageExtensions(message *descriptor.DescriptorProto) *MessageExtension
 func getKrillOpenapiMessageExtension(message *descriptor.DescriptorProto) *pocketpb.OpenapiMessage {
 	if message.Options != nil {
 		m := proto.GetExtension(message.Options, pocketpb.E_Message)
-		return (m.(*pocketpb.OpenapiMessage))
+		return m.(*pocketpb.OpenapiMessage)
 	}
 
 	return nil
@@ -331,7 +331,7 @@ func enumStringsIntersection(s1, s2 string) string {
 		return ""
 	}
 
-	parts := []string{}
+	var parts []string
 	for _, s := range i {
 		parts = append(parts, s.(string))
 	}

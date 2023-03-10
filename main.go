@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	options := NewPluginOptions()
+	options := newPluginOptions()
 
 	protogen.Options{
 		ParamFunc: options.FlagsSet(),
