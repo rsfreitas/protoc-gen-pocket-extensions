@@ -44,6 +44,20 @@ func buildPathItemResponses(extensions *pocket.MethodExtensions, method *descrip
 		}
 	}
 
+	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_CREATED); ok {
+		res := extensions.OpenapiMethod.GetResponse()[index]
+		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{
+			Description: res.GetDescription(),
+			Content: map[string]*Media{
+				"application/json": NewMedia(
+					NewSchema(&SchemaOptions{
+						Ref: refComponentsSchemas + trimPackagePath(method.GetOutputType()),
+					}),
+				),
+			},
+		}
+	}
+
 	if index, ok := containsCode(pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST); ok {
 		res := extensions.OpenapiMethod.GetResponse()[index]
 		responses[pocket.ResponseCodeToHttpCode(res.GetCode())] = &Response{

@@ -62,6 +62,7 @@ enum ResponseCode {
   RESPONSE_CODE_BAD_REQUEST = 3;
   RESPONSE_CODE_PRECONDITION_FAILED = 4;
   RESPONSE_CODE_INTERNAL_ERROR = 5;
+  RESPONSE_CODE_CREATED = 6;
 }
 
 // Annotations to be used inside a message declaration block.

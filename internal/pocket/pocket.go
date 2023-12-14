@@ -299,6 +299,8 @@ func ResponseCodeToHttpCode(code pocketpb.ResponseCode) string {
 	switch code {
 	case pocketpb.ResponseCode_RESPONSE_CODE_OK:
 		return "200"
+	case pocketpb.ResponseCode_RESPONSE_CODE_CREATED:
+		return "201"
 	case pocketpb.ResponseCode_RESPONSE_CODE_NOT_FOUND:
 		return "404"
 	case pocketpb.ResponseCode_RESPONSE_CODE_BAD_REQUEST:
